@@ -71,7 +71,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import static com.hazelcast.util.EmptyStatement.ignore;
 
-public final class ServiceManagerImpl implements ServiceManager {
+public class ServiceManagerImpl implements ServiceManager {
 
     private final NodeEngineImpl nodeEngine;
     private final ILogger logger;
@@ -274,7 +274,7 @@ public final class ServiceManagerImpl implements ServiceManager {
         }
     }
 
-    private synchronized void registerService(String serviceName, Object service) {
+    protected synchronized void registerService(String serviceName, Object service) {
         if (logger.isFinestEnabled()) {
             logger.finest("Registering service: '" + serviceName + "'");
         }

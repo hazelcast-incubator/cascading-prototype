@@ -83,7 +83,6 @@
     <suppress checks="MethodCount" files="com/hazelcast/cache/impl/CacheStatisticsImpl"/>
     <suppress checks="ClassDataAbstractionCoupling"
               files="com/hazelcast/cache/impl/DefaultOperationProvider"/>
-
     <!-- Core -->
     <suppress checks="JavadocMethod" files="com/hazelcast/core/"/>
     <suppress checks="JavadocType" files="com/hazelcast/core/"/>

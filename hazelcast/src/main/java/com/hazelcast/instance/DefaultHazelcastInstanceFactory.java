@@ -22,20 +22,18 @@ import com.hazelcast.core.DuplicateInstanceNameException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.hazelcast.jmx.ManagementService;
-import com.hazelcast.spi.annotation.PrivateApi;
 import com.hazelcast.util.EmptyStatement;
 import com.hazelcast.util.ExceptionUtil;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.ServiceLoader;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -46,30 +44,16 @@ import static com.hazelcast.util.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-@SuppressWarnings("SynchronizationOnStaticField")
-@PrivateApi
-public final class HazelcastInstanceFactory {
-    public static final IHazelcastInstanceFactory INSTANCE;
-
-    static {
-        ServiceLoader serviceLoader = ServiceLoader.load(IHazelcastInstanceFactory.class);
-        Iterator iterator = serviceLoader.iterator();
-        if (iterator.hasNext()) {
-            INSTANCE = ServiceLoader.load(IHazelcastInstanceFactory.class).iterator().next();
-        } else {
-            INSTANCE = new DefaultHazelcastInstanceFactory();
-        }
-    }
-
+public class DefaultHazelcastInstanceFactory implements IHazelcastInstanceFactory {
     private static final int ADDITIONAL_SLEEP_SECONDS_FOR_NON_FIRST_MEMBERS = 4;
 
     private static final ConcurrentMap<String, InstanceFuture> INSTANCE_MAP = new ConcurrentHashMap<String, InstanceFuture>(5);
     private static final AtomicInteger FACTORY_ID_GEN = new AtomicInteger();
 
-    private HazelcastInstanceFactory() {
+    protected DefaultHazelcastInstanceFactory() {
     }
 
-    public static Set<HazelcastInstance> getAllHazelcastInstances() {
+    public Set<HazelcastInstance> getAllHazelcastInstances() {
         Set<HazelcastInstance> result = new HashSet<HazelcastInstance>();
         for (InstanceFuture f : INSTANCE_MAP.values()) {
             result.add(f.get());
@@ -77,7 +61,7 @@ public final class HazelcastInstanceFactory {
         return result;
     }
 
-    public static HazelcastInstance getHazelcastInstance(String instanceName) {
+    public HazelcastInstance getHazelcastInstance(String instanceName) {
         InstanceFuture instanceFuture = INSTANCE_MAP.get(instanceName);
         if (instanceFuture == null) {
             return null;
@@ -90,7 +74,7 @@ public final class HazelcastInstanceFactory {
         }
     }
 
-    public static HazelcastInstance getOrCreateHazelcastInstance(Config config) {
+    public HazelcastInstance getOrCreateHazelcastInstance(Config config) {
         checkNotNull(config, "config can't be null");
 
         String name = config.getInstanceName();
@@ -116,7 +100,7 @@ public final class HazelcastInstanceFactory {
         }
     }
 
-    public static HazelcastInstance newHazelcastInstance(Config config) {
+    public HazelcastInstance newHazelcastInstance(Config config) {
         if (config == null) {
             config = new XmlConfigBuilder().build();
         }
@@ -128,6 +112,16 @@ public final class HazelcastInstanceFactory {
         return "_hzInstance_" + FACTORY_ID_GEN.incrementAndGet() + "_" + config.getGroupConfig().getName();
     }
 
+    protected String getInstanceName(String instanceName, Config config) {
+        String name = instanceName;
+
+        if (name == null || name.trim().length() == 0) {
+            name = createInstanceName(config);
+        }
+
+        return name;
+    }
+
     /**
      * Creates a new Hazelcast instance.
      *
@@ -137,15 +131,12 @@ public final class HazelcastInstanceFactory {
      * @param nodeContext  the {@link NodeContext} to use
      * @return the configured {@link HazelcastInstance}
      */
-    public static HazelcastInstance newHazelcastInstance(Config config, String instanceName, NodeContext nodeContext) {
+    public HazelcastInstance newHazelcastInstance(Config config, String instanceName, NodeContext nodeContext) {
         if (config == null) {
             config = new XmlConfigBuilder().build();
         }
 
-        String name = instanceName;
-        if (name == null || name.trim().length() == 0) {
-            name = createInstanceName(config);
-        }
+        String name = getInstanceName(instanceName, config);
 
         InstanceFuture future = new InstanceFuture();
         if (INSTANCE_MAP.putIfAbsent(name, future) != null) {
@@ -161,8 +152,12 @@ public final class HazelcastInstanceFactory {
         }
     }
 
-    private static HazelcastInstanceProxy constructHazelcastInstance(Config config, String instanceName, NodeContext nodeContext,
-                                                                     InstanceFuture future) {
+    protected HazelcastInstanceProxy newHazelcastProxy(HazelcastInstanceImpl hazelcastInstance) {
+        return new HazelcastInstanceProxy(hazelcastInstance);
+    }
+
+    private HazelcastInstanceProxy constructHazelcastInstance(Config config, String instanceName, NodeContext nodeContext,
+                                                              InstanceFuture future) {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         HazelcastInstanceProxy proxy;
@@ -172,7 +167,7 @@ public final class HazelcastInstanceFactory {
             }
             HazelcastInstanceImpl hazelcastInstance = new HazelcastInstanceImpl(instanceName, config, nodeContext);
             OutOfMemoryErrorDispatcher.registerServer(hazelcastInstance);
-            proxy = new HazelcastInstanceProxy(hazelcastInstance);
+            proxy = newHazelcastProxy(hazelcastInstance);
             Node node = hazelcastInstance.node;
             boolean firstMember = isFirstMember(node);
             long initialWaitSeconds = node.groupProperties.getSeconds(GroupProperty.INITIAL_WAIT_SECONDS);
@@ -230,11 +225,11 @@ public final class HazelcastInstanceFactory {
         }
     }
 
-    public static void shutdownAll() {
+    public void shutdownAll() {
         shutdownAll(false);
     }
 
-    public static void terminateAll() {
+    public void terminateAll() {
         shutdownAll(true);
     }
 
@@ -267,31 +262,26 @@ public final class HazelcastInstanceFactory {
         }
     }
 
-    static Set<HazelcastInstanceImpl> getInstanceImpls(Collection<Member> members) {
-        Set<HazelcastInstanceImpl> set = new HashSet<HazelcastInstanceImpl>();
+    public Map<MemberImpl, HazelcastInstanceImpl> getInstanceImplMap() {
+        Map<MemberImpl, HazelcastInstanceImpl> map = new HashMap<MemberImpl, HazelcastInstanceImpl>();
         for (InstanceFuture future : INSTANCE_MAP.values()) {
             try {
-                if (future.isSet()) {
-                    HazelcastInstanceProxy instanceProxy = future.get();
-                    HazelcastInstanceImpl impl = instanceProxy.original;
-                    if (impl != null) {
-                        final MemberImpl localMember = impl.node.getLocalMember();
-                        if (members.contains(localMember)) {
-                            set.add(impl);
-                        }
-                    }
+                HazelcastInstanceProxy instanceProxy = future.get();
+                HazelcastInstanceImpl impl = instanceProxy.original;
+                if (impl != null) {
+                    map.put(impl.node.getLocalMember(), impl);
                 }
             } catch (RuntimeException ignored) {
                 EmptyStatement.ignore(ignored);
             }
         }
-        return set;
+        return map;
     }
 
-    static void remove(HazelcastInstanceImpl instance) {
+    public void remove(HazelcastInstanceImpl instance) {
         OutOfMemoryErrorDispatcher.deregisterServer(instance);
         InstanceFuture future = INSTANCE_MAP.remove(instance.getName());
-        if (future != null && future.isSet()) {
+        if (future != null) {
             future.get().original = null;
         }
         if (INSTANCE_MAP.size() == 0) {
@@ -343,10 +333,6 @@ public final class HazelcastInstanceFactory {
                 this.throwable = throwable;
                 notifyAll();
             }
-        }
-
-        boolean isSet() {
-            return hz != null;
         }
     }
 }
