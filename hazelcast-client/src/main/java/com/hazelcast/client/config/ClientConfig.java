@@ -16,15 +16,18 @@
 
 package com.hazelcast.client.config;
 
-import com.hazelcast.client.LoadBalancer;
-import com.hazelcast.config.ConfigPatternMatcher;
+
 import com.hazelcast.config.GroupConfig;
+import com.hazelcast.client.LoadBalancer;
 import com.hazelcast.config.ListenerConfig;
-import com.hazelcast.config.NativeMemoryConfig;
 import com.hazelcast.config.NearCacheConfig;
 import com.hazelcast.config.QueryCacheConfig;
+import com.hazelcast.config.NativeMemoryConfig;
 import com.hazelcast.config.SerializationConfig;
+import com.hazelcast.config.CustomServiceConfig;
+import com.hazelcast.config.ConfigPatternMatcher;
 import com.hazelcast.config.SocketInterceptorConfig;
+
 import com.hazelcast.config.matcher.MatchingPointConfigPatternMatcher;
 import com.hazelcast.core.ManagedContext;
 import com.hazelcast.instance.HazelcastProperty;
@@ -38,6 +41,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.hazelcast.partition.strategy.StringPartitioningStrategy.getBaseName;
 import static com.hazelcast.util.Preconditions.checkFalse;
 
 /**
@@ -102,6 +106,8 @@ public class ClientConfig {
     private NativeMemoryConfig nativeMemoryConfig = new NativeMemoryConfig();
 
     private List<ProxyFactoryConfig> proxyFactoryConfigs = new LinkedList<ProxyFactoryConfig>();
+
+    private final Map<String, CustomServiceConfig> customConfigs = new ConcurrentHashMap<String, CustomServiceConfig>();
 
     private ManagedContext managedContext;
 
@@ -670,6 +676,22 @@ public class ClientConfig {
      */
     public ClientConfig setSerializationConfig(SerializationConfig serializationConfig) {
         this.serializationConfig = serializationConfig;
+        return this;
+    }
+
+    public <T extends CustomServiceConfig> T getServiceConfig(String name) {
+        String baseName = getBaseName(name);
+        T config = (T) lookupByPattern(customConfigs, baseName);
+
+        if (config != null) {
+            return config;
+        }
+
+        return config;
+    }
+
+    public ClientConfig addCustomServiceConfig(CustomServiceConfig customServiceConfig) {
+        this.customConfigs.put(customServiceConfig.getName(), customServiceConfig);
         return this;
     }
 

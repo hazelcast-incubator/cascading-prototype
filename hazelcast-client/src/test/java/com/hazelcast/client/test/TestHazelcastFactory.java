@@ -16,25 +16,31 @@
 
 package com.hazelcast.client.test;
 
-import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.client.config.ClientConfig;
-import com.hazelcast.client.config.XmlClientConfigBuilder;
-import com.hazelcast.client.connection.AddressProvider;
-import com.hazelcast.client.impl.ClientConnectionManagerFactory;
-import com.hazelcast.client.impl.HazelcastClientInstanceImpl;
-import com.hazelcast.client.impl.HazelcastClientProxy;
-import com.hazelcast.client.util.AddressHelper;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.instance.OutOfMemoryErrorDispatcher;
-import com.hazelcast.nio.Address;
-import com.hazelcast.test.TestEnvironment;
-import com.hazelcast.test.TestHazelcastInstanceFactory;
 
-import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+
+import com.hazelcast.nio.Address;
+
+import java.net.InetSocketAddress;
+
+import com.hazelcast.test.TestEnvironment;
+import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.client.util.AddressHelper;
+import com.hazelcast.client.config.ClientConfig;
+
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.hazelcast.client.impl.HazelcastClientProxy;
+import com.hazelcast.client.connection.AddressProvider;
+import com.hazelcast.test.TestHazelcastInstanceFactory;
+import com.hazelcast.instance.OutOfMemoryErrorDispatcher;
+import com.hazelcast.client.config.XmlClientConfigBuilder;
+import com.hazelcast.client.impl.HazelcastClientInstanceImpl;
+import com.hazelcast.client.impl.ClientConnectionManagerFactory;
+
 
 public class TestHazelcastFactory extends TestHazelcastInstanceFactory {
 

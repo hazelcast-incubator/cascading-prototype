@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.ServiceLoader;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,6 +49,17 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @SuppressWarnings("SynchronizationOnStaticField")
 @PrivateApi
 public final class HazelcastInstanceFactory {
+    public static final IHazelcastInstanceFactory INSTANCE;
+
+    static {
+        ServiceLoader serviceLoader = ServiceLoader.load(IHazelcastInstanceFactory.class);
+        Iterator iterator = serviceLoader.iterator();
+        if (iterator.hasNext()) {
+            INSTANCE = ServiceLoader.load(IHazelcastInstanceFactory.class).iterator().next();
+        } else {
+            INSTANCE = new DefaultHazelcastInstanceFactory();
+        }
+    }
 
     private static final int ADDITIONAL_SLEEP_SECONDS_FOR_NON_FIRST_MEMBERS = 4;
 

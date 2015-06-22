@@ -55,7 +55,7 @@ This section lists the enhancements performed for Hazelcast 3.6 release.
 The following are the other improvements performed to solve the enhancement issues opened by the Hazelcast customers/team.
 
 - Approximate `max-size` calculation should be removed for IMap eviction. [6463]
-- `SpringAwareWebFilter` should have a constructor which takes properties as arguments. [6438]
+- `SpringAwareWebFilter` should have a constructor which takes properties as argument. [6438]
 - Client side and server side cache proxies handle `putAll` operation one by one. This is not efficient. Records for this operation should be grouped as per their partitions and should be sent and processed in batches. [6367]
 - Not requested events should not be sent to `MapListener` [6349]
 - Inconsistent and potentially buggy design in `BasicCompletableFuture`. [6080]

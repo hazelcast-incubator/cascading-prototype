@@ -32,7 +32,7 @@ import static com.hazelcast.nio.Packet.HEADER_WAN_REPLICATION;
  */
 public class PacketDispatcherImpl implements PacketDispatcher {
 
-    private final ILogger logger;
+    protected final ILogger logger;
     private final PacketHandler eventPacketHandler;
     private final PacketHandler wanReplicationPacketHandler;
     private final PacketHandler operationPacketHandler;

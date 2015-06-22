@@ -32,6 +32,7 @@ import com.hazelcast.client.impl.protocol.ClientExceptionFactory;
 import com.hazelcast.client.impl.protocol.ClientMessage;
 import com.hazelcast.client.impl.protocol.MessageTaskFactory;
 import com.hazelcast.client.impl.protocol.task.MessageTask;
+import com.hazelcast.client.impl.protocol.task.NoSuchMessageTask;
 import com.hazelcast.cluster.ClusterService;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Client;
@@ -75,21 +76,24 @@ import com.hazelcast.spi.impl.operationservice.InternalOperationService;
 import com.hazelcast.transaction.TransactionManagerService;
 import com.hazelcast.util.executor.ExecutorType;
 
-import javax.security.auth.login.LoginException;
-import java.security.Permission;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+
 import java.util.Map;
+import java.util.List;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Collection;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.security.Permission;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.security.auth.login.LoginException;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
+import java.util.concurrent.Future;
+
 
 import static com.hazelcast.spi.impl.OperationResponseHandlerFactory.createEmptyResponseHandler;
 
@@ -120,7 +124,7 @@ public class ClientEngineImpl implements ClientEngine, CoreService, PostJoinAwar
     private final ILogger logger;
     private final ConnectionListener connectionListener = new ConnectionListenerImpl();
 
-    private final MessageTaskFactory messageTaskFactory;
+    private final List<? extends MessageTaskFactory> messageTaskFactories;
     private final ClientExceptionFactory clientExceptionFactory;
 
     public ClientEngineImpl(Node node) {
@@ -130,7 +134,7 @@ public class ClientEngineImpl implements ClientEngine, CoreService, PostJoinAwar
         this.nodeEngine = node.nodeEngine;
         this.endpointManager = new ClientEndpointManagerImpl(this, nodeEngine);
         this.executor = newExecutor();
-        this.messageTaskFactory = node.getNodeExtension().createMessageTaskFactory();
+        this.messageTaskFactories = node.getNodeExtension().createMessageTaskFactories();
         this.clientExceptionFactory = initClientExceptionFactory();
 
         ClientHeartbeatMonitor heartBeatMonitor = new ClientHeartbeatMonitor(
@@ -187,13 +191,28 @@ public class ClientEngineImpl implements ClientEngine, CoreService, PostJoinAwar
 
         //TODO: FIXME
         int partitionId = clientMessage.getPartitionId();
-        final MessageTask messageTask = messageTaskFactory.create(clientMessage, connection);
+        final MessageTask messageTask = resolveClientMessage(clientMessage, connection);
         if (partitionId < 0) {
             executor.execute(messageTask);
         } else {
             InternalOperationService operationService = nodeEngine.getOperationService();
             operationService.execute(messageTask);
         }
+    }
+
+    private MessageTask resolveClientMessage(ClientMessage clientMessage, Connection connection) {
+        MessageTask messageTask = null;
+
+        for (MessageTaskFactory messageTaskFactory : this.messageTaskFactories) {
+            messageTask = messageTaskFactory.create(clientMessage, connection);
+            if (!(messageTask instanceof NoSuchMessageTask)) {
+                return messageTask;
+            }
+        }
+
+        return messageTask == null
+                ?
+                new NoSuchMessageTask(clientMessage, node, connection) : messageTask;
     }
 
     @Override

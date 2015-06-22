@@ -16,6 +16,14 @@
 
 package com.hazelcast.collection.impl.list;
 
+import java.util.List;
+import java.util.Iterator;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.ListIterator;
+import java.util.stream.Stream;
+
 import com.hazelcast.collection.impl.collection.AbstractCollectionProxyImpl;
 import com.hazelcast.collection.impl.list.operations.ListAddAllOperation;
 import com.hazelcast.collection.impl.list.operations.ListAddOperation;
@@ -32,11 +40,6 @@ import com.hazelcast.spi.NodeEngine;
 import com.hazelcast.spi.impl.SerializableList;
 import com.hazelcast.spi.impl.UnmodifiableLazyList;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 
 public class ListProxyImpl<E> extends AbstractCollectionProxyImpl<ListService, E> implements IList<E> {
 
@@ -159,6 +162,11 @@ public class ListProxyImpl<E> extends AbstractCollectionProxyImpl<ListService, E
     @Override
     public String getServiceName() {
         return ListService.SERVICE_NAME;
+    }
+
+    @Override
+    public Stream<E> stream() {
+        return getService().getiListStreamFactory().<E>getStream(getNodeEngine().getHazelcastInstance(), name);
     }
 
 }

@@ -51,6 +51,7 @@ import com.hazelcast.wan.WanReplicationService;
 import com.hazelcast.wan.impl.WanReplicationServiceImpl;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static com.hazelcast.map.impl.MapServiceConstructor.getDefaultMapServiceConstructor;
@@ -190,8 +191,8 @@ public class DefaultNodeExtension implements NodeExtension {
     }
 
     @Override
-    public MessageTaskFactory createMessageTaskFactory() {
-        return new MessageTaskFactoryImpl(node);
+    public List<? extends MessageTaskFactory> createMessageTaskFactories() {
+        return Collections.singletonList(new MessageTaskFactoryImpl(node));
     }
 
     @Override

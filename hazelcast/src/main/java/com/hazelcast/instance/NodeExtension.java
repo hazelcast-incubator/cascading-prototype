@@ -28,6 +28,7 @@ import com.hazelcast.nio.tcp.TcpIpConnection;
 import com.hazelcast.nio.tcp.WriteHandler;
 import com.hazelcast.security.SecurityContext;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -130,7 +131,7 @@ public interface NodeExtension {
     /**
      * Creates factory method that creates server side client message handlers
      */
-    MessageTaskFactory createMessageTaskFactory();
+    List<? extends MessageTaskFactory> createMessageTaskFactories();
 
     /**
      * Called on thread start to inject/intercept extension specific logic,

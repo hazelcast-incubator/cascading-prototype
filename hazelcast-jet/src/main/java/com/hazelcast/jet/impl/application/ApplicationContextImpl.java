@@ -1,0 +1,324 @@
+/*
+ * Copyright (c) 2008-2015, Hazelcast, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.hazelcast.jet.impl.application;
+
+
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+
+
+import com.hazelcast.nio.Address;
+import com.hazelcast.core.IFunction;
+import com.hazelcast.spi.NodeEngine;
+import com.hazelcast.jet.api.dag.DAG;
+
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.hazelcast.jet.api.data.io.SocketReader;
+import com.hazelcast.jet.api.data.io.SocketWriter;
+import com.hazelcast.jet.api.counters.Accumulator;
+
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.hazelcast.util.ConcurrentReferenceHashMap;
+import com.hazelcast.jet.impl.executor.NetworkExecutor;
+import com.hazelcast.jet.api.application.ExecutorContext;
+import com.hazelcast.jet.api.container.ContainerListener;
+import com.hazelcast.jet.api.config.JetApplicationConfig;
+import com.hazelcast.jet.api.executor.ApplicationExecutor;
+import com.hazelcast.jet.api.application.ApplicationContext;
+import com.hazelcast.jet.api.application.ApplicationListener;
+import com.hazelcast.jet.impl.container.ApplicationMasterImpl;
+import com.hazelcast.jet.impl.container.DefaultDiscoveryService;
+import com.hazelcast.jet.api.statemachine.ApplicationStateMachine;
+import com.hazelcast.jet.api.statemachine.StateMachineRequestProcessor;
+import com.hazelcast.jet.api.statemachine.application.ApplicationEvent;
+import com.hazelcast.jet.api.application.localization.LocalizationStorage;
+import com.hazelcast.jet.api.container.applicationmaster.ApplicationMaster;
+import com.hazelcast.jet.impl.application.localization.LocalizationStorageFactory;
+import com.hazelcast.jet.impl.statemachine.application.ApplicationStateMachineImpl;
+import com.hazelcast.jet.api.statemachine.application.ApplicationStateMachineFactory;
+import com.hazelcast.jet.impl.statemachine.application.DefaultApplicationStateMachineRequestProcessor;
+
+public class ApplicationContextImpl extends IOContextImpl implements ApplicationContext {
+    private static final ApplicationStateMachineFactory STATE_MACHINE_FACTORY =
+            new ApplicationStateMachineFactory() {
+                @Override
+                public ApplicationStateMachine newStateMachine(String name,
+                                                               StateMachineRequestProcessor<ApplicationEvent> processor,
+                                                               NodeEngine nodeEngine,
+                                                               ApplicationContext applicationContext) {
+                    return new ApplicationStateMachineImpl(
+                            name,
+                            processor,
+                            nodeEngine,
+                            applicationContext
+                    );
+                }
+            };
+
+    private static final IFunction<String, List<ContainerListener>> FUNCTION_FACTORY =
+            new IFunction<String, List<ContainerListener>>() {
+                @Override
+                public List<ContainerListener> apply(String input) {
+                    return new CopyOnWriteArrayList<ContainerListener>();
+                }
+            };
+
+    private final String name;
+
+    private final NodeEngine nodeEngine;
+    private final AtomicReference<Address> owner;
+    private final AtomicInteger containerIdGenerator;
+    private final ApplicationExecutor networkExecutor;
+    private final ApplicationMaster applicationMaster;
+    private final LocalizationStorage localizationStorage;
+    private final Map<Address, Address> hzToAddressMapping;
+    private final JetApplicationConfig jetApplicationConfig;
+    private final ApplicationStateMachine applicationStateMachine;
+    private final Map<String, Object> applicationVariables = new ConcurrentHashMap<String, Object>();
+    private final List<ApplicationListener> applicationListeners = new CopyOnWriteArrayList<ApplicationListener>();
+    private final com.hazelcast.util.IConcurrentMap<String, List<ContainerListener>> containerListeners =
+            new ConcurrentReferenceHashMap<String, List<ContainerListener>>();
+
+    private final Address localJetAddress;
+
+    private final Map<Address, SocketWriter> socketWriters = new HashMap<Address, SocketWriter>();
+
+    private final Map<Address, SocketReader> socketReaders = new HashMap<Address, SocketReader>();
+
+    private final ExecutorContext executorContext;
+
+    private final List<ConcurrentMap<String, Accumulator>> accumulators;
+
+    public ApplicationContextImpl(String name,
+                                  NodeEngine nodeEngine,
+                                  Address localJetAddress,
+                                  JetApplicationConfig jetApplicationConfig) {
+        this.name = name;
+        this.nodeEngine = nodeEngine;
+        this.localJetAddress = localJetAddress;
+        this.owner = new AtomicReference<Address>();
+        this.containerIdGenerator = new AtomicInteger(0);
+
+        if (isEmptyConfig(jetApplicationConfig)) {
+            jetApplicationConfig = nodeEngine.getConfig().getServiceConfig(name);
+
+            if (isEmptyConfig(jetApplicationConfig)) {
+                jetApplicationConfig = new JetApplicationConfig();
+            }
+        }
+
+        this.jetApplicationConfig = jetApplicationConfig;
+        this.networkExecutor = new NetworkExecutor(
+                "network-reader-writer",
+                jetApplicationConfig.getIoThreadCount(),
+                jetApplicationConfig.getJetSecondsToAwait(),
+                nodeEngine
+        );
+
+        this.executorContext = new DefaultExecutorContext(
+                this.name,
+                jetApplicationConfig,
+                nodeEngine,
+                this.networkExecutor
+        );
+
+        this.localizationStorage = LocalizationStorageFactory.getLocalizationStorage(
+                this,
+                name
+        );
+
+        this.applicationStateMachine = STATE_MACHINE_FACTORY.newStateMachine(
+                name,
+                new DefaultApplicationStateMachineRequestProcessor(),
+                nodeEngine,
+                this
+        );
+
+        this.hzToAddressMapping = new HashMap<Address, Address>();
+        this.accumulators = new CopyOnWriteArrayList<ConcurrentMap<String, Accumulator>>();
+
+        this.applicationMaster = createApplicationMaster(nodeEngine);
+    }
+
+    private ApplicationMasterImpl createApplicationMaster(NodeEngine nodeEngine) {
+        return new ApplicationMasterImpl(
+                this,
+                this.networkExecutor,
+                new DefaultDiscoveryService(
+                        this,
+                        nodeEngine,
+                        this.socketWriters,
+                        this.socketReaders,
+                        this.hzToAddressMapping,
+                        this.networkExecutor
+                )
+        );
+    }
+
+    private boolean isEmptyConfig(JetApplicationConfig jetApplicationConfig) {
+        return (jetApplicationConfig == null) || (jetApplicationConfig.getName() == null);
+    }
+
+    @Override
+    public boolean validateOwner(Address applicationOwner) {
+        return this.owner.compareAndSet(null, applicationOwner) || (this.owner.compareAndSet(applicationOwner, applicationOwner));
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public Address getOwner() {
+        return this.owner.get();
+    }
+
+    @Override
+    public LocalizationStorage getLocalizationStorage() {
+        return this.localizationStorage;
+    }
+
+    @Override
+    public ApplicationStateMachine getApplicationStateMachine() {
+        return this.applicationStateMachine;
+    }
+
+    @Override
+    public ApplicationMaster getApplicationMaster() {
+        return applicationMaster;
+    }
+
+    @Override
+    public NodeEngine getNodeEngine() {
+        return nodeEngine;
+    }
+
+    @Override
+    public JetApplicationConfig getJetApplicationConfig() {
+        return this.jetApplicationConfig;
+    }
+
+    @Override
+    public void registerApplicationListener(ApplicationListener applicationListener) {
+        this.applicationListeners.add(applicationListener);
+    }
+
+    @Override
+    public ConcurrentMap<String, List<ContainerListener>> getContainerListeners() {
+        return this.containerListeners;
+    }
+
+    @Override
+    public List<ApplicationListener> getApplicationListeners() {
+        return this.applicationListeners;
+    }
+
+    @Override
+    public AtomicInteger getContainerIDGenerator() {
+        return this.containerIdGenerator;
+    }
+
+    @Override
+    public DAG getDAG() {
+        return this.applicationMaster.getDag();
+    }
+
+    @Override
+    public Map<Address, Address> getHzToJetAddressMapping() {
+        return this.hzToAddressMapping;
+    }
+
+    @Override
+    public Map<Address, SocketWriter> getSocketWriters() {
+        return this.socketWriters;
+    }
+
+    @Override
+    public Map<Address, SocketReader> getSocketReaders() {
+        return this.socketReaders;
+    }
+
+    @Override
+    public Address getLocalJetAddress() {
+        return this.localJetAddress;
+    }
+
+    @Override
+    public void registerContainerListener(String vertexName,
+                                          ContainerListener containerListener) {
+        List<ContainerListener> listeners =
+                this.containerListeners.applyIfAbsent(vertexName, FUNCTION_FACTORY);
+        listeners.add(containerListener);
+    }
+
+    @Override
+    public <T> void putApplicationVariable(String variableName,
+                                           T variable) {
+        this.applicationVariables.put(variableName, variable);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T getApplicationVariable(String variableName) {
+        return (T) this.applicationVariables.get(variableName);
+    }
+
+    @Override
+    public void cleanApplicationVariable(String variableName) {
+        this.applicationVariables.remove(variableName);
+    }
+
+    @Override
+    public ExecutorContext getExecutorContext() {
+        return this.executorContext;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Map<String, Accumulator> getAccumulators() {
+        Map<String, Accumulator> map = new HashMap<String, Accumulator>();
+
+        for (ConcurrentMap<String, Accumulator> concurrentMap : this.accumulators) {
+            for (Map.Entry<String, Accumulator> entry : concurrentMap.entrySet()) {
+                String counterName = entry.getKey();
+                Accumulator accumulator = entry.getValue();
+
+                Accumulator collector = map.get(counterName);
+
+                if (collector == null) {
+                    map.put(counterName, accumulator);
+                } else {
+                    collector.merge(accumulator);
+                }
+            }
+        }
+
+        return map;
+    }
+
+    @Override
+    public void registerAccumulators(ConcurrentMap<String, Accumulator> accumulatorMap) {
+        this.accumulators.add(accumulatorMap);
+    }
+}
