@@ -209,9 +209,6 @@ public final class HazelcastInstanceManager {
         return set;
     }
 
-    protected static HazelcastInstanceProxy newHazelcastProxy(HazelcastInstanceImpl hazelcastInstance) {
-        return new HazelcastInstanceProxy(hazelcastInstance);
-    }
 
     private static HazelcastInstanceProxy constructHazelcastInstance(Config config, String instanceName, NodeContext nodeContext,
                                                                      InstanceFuture future) {
@@ -225,7 +222,9 @@ public final class HazelcastInstanceManager {
             HazelcastInstanceImpl hazelcastInstance =
                     (HazelcastInstanceImpl) INSTANCE_FACTORY.newHazelcastInstance(config, instanceName, nodeContext);
             OutOfMemoryErrorDispatcher.registerServer(hazelcastInstance);
-            proxy = newHazelcastProxy(hazelcastInstance);
+
+            proxy = INSTANCE_FACTORY.newHazelcastInstanceProxy(hazelcastInstance);
+
             Node node = hazelcastInstance.node;
             boolean firstMember = isFirstMember(node);
             long initialWaitSeconds = node.groupProperties.getSeconds(GroupProperty.INITIAL_WAIT_SECONDS);

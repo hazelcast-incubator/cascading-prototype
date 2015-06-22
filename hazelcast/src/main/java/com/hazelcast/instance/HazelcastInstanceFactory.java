@@ -29,4 +29,6 @@ public interface HazelcastInstanceFactory {
                                            NodeContext nodeContext) throws Exception;
 
     HazelcastInstance newHazelcastInstance(Config config) throws Exception;
+
+    HazelcastInstanceProxy newHazelcastInstanceProxy(HazelcastInstance hazelcastInstance);
 }
