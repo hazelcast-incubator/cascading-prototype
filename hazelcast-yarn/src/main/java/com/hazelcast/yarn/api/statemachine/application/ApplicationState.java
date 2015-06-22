@@ -1,0 +1,25 @@
+package com.hazelcast.yarn.api.statemachine.application;
+
+import com.hazelcast.yarn.api.statemachine.StateMachineState;
+
+public enum ApplicationState implements StateMachineState {
+    NEW,
+    INIT_IN_PROGRESS,
+    INIT_SUCCESS,
+    INIT_FAILURE,
+    LOCALIZATION_IN_PROGRESS,
+    LOCALIZATION_SUCCESS,
+    LOCALIZATION_FAILURE,
+    SUBMIT_IN_PROGRESS,
+    SUBMIT_SUCCESS,
+    SUBMIT_FAILURE,
+    INTERRUPTION_IN_PROGRESS,
+    INTERRUPTION_SUCCESS,
+    INTERRUPTION_FAILURE,
+    EXECUTION_IN_PROGRESS,
+    EXECUTION_SUCCESS,
+    EXECUTION_FAILURE,
+    FINALIZATION_IN_PROGRESS,
+    FINALIZATION_SUCCESS,
+    FINALIZATION_FAILURE
+}

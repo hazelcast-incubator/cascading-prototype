@@ -56,6 +56,7 @@ import com.hazelcast.topic.impl.reliable.ReliableTopicService;
 import com.hazelcast.topic.impl.TopicService;
 import com.hazelcast.transaction.impl.xa.XAService;
 import com.hazelcast.transaction.impl.TransactionManagerServiceImpl;
+
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Collections;
@@ -69,9 +70,9 @@ import java.util.concurrent.ConcurrentMap;
 
 import static com.hazelcast.util.EmptyStatement.ignore;
 
-public final class ServiceManagerImpl implements ServiceManager {
+public class ServiceManagerImpl implements ServiceManager {
 
-    private final NodeEngineImpl nodeEngine;
+    protected final NodeEngineImpl nodeEngine;
     private final ILogger logger;
     private final ConcurrentMap<String, ServiceInfo> services = new ConcurrentHashMap<String, ServiceInfo>(20, .75f, 1);
 
@@ -111,7 +112,7 @@ public final class ServiceManagerImpl implements ServiceManager {
         registerService(QuorumServiceImpl.SERVICE_NAME, nodeEngine.getQuorumService());
     }
 
-    private void registerDefaultServices(ServicesConfig servicesConfig) {
+    protected void registerDefaultServices(ServicesConfig servicesConfig) {
         if (!servicesConfig.isEnableDefaults()) {
             return;
         }
@@ -132,6 +133,7 @@ public final class ServiceManagerImpl implements ServiceManager {
         registerService(SemaphoreService.SERVICE_NAME, new SemaphoreService(nodeEngine));
         registerService(IdGeneratorService.SERVICE_NAME, new IdGeneratorService(nodeEngine));
         registerService(MapReduceService.SERVICE_NAME, new MapReduceService(nodeEngine));
+
         registerService(ReplicatedMapService.SERVICE_NAME, new ReplicatedMapService(nodeEngine));
         registerService(RingbufferService.SERVICE_NAME, new RingbufferService(nodeEngine));
         registerService(XAService.SERVICE_NAME, new XAService(nodeEngine));
@@ -261,7 +263,7 @@ public final class ServiceManagerImpl implements ServiceManager {
         }
     }
 
-    private synchronized void registerService(String serviceName, Object service) {
+    protected synchronized void registerService(String serviceName, Object service) {
         if (logger.isFinestEnabled()) {
             logger.finest("Registering service: '" + serviceName + "'");
         }

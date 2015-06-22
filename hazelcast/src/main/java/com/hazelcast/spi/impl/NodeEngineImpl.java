@@ -76,20 +76,38 @@ import static com.hazelcast.instance.GroupProperty.PERFORMANCE_METRICS_LEVEL;
 public class NodeEngineImpl implements NodeEngine {
 
     private final Node node;
-    private final ILogger logger;
-    private final EventServiceImpl eventService;
-    private final OperationServiceImpl operationService;
+    protected final ILogger logger;
+    protected final EventServiceImpl eventService;
+    protected final OperationServiceImpl operationService;
     private final ExecutionServiceImpl executionService;
     private final WaitNotifyServiceImpl waitNotifyService;
-    private final ServiceManagerImpl serviceManager;
+    protected final ServiceManagerImpl serviceManager;
     private final TransactionManagerServiceImpl transactionManagerService;
     private final ProxyServiceImpl proxyService;
-    private final WanReplicationService wanReplicationService;
+    protected final WanReplicationService wanReplicationService;
     private final PacketDispatcher packetDispatcher;
     private final QuorumServiceImpl quorumService;
     private final MetricsRegistryImpl metricsRegistry;
     private final SerializationService serializationService;
     private final LoggingServiceImpl loggingService;
+
+    protected PacketDispatcher createPacketDispatcher() {
+        return new PacketDispatcherImpl(
+                logger,
+                operationService,
+                eventService,
+                wanReplicationService,
+                connectionManagerPacketHandler()
+        );
+    }
+
+    protected PacketHandler connectionManagerPacketHandler() {
+        return new ConnectionManagerPacketHandler();
+    }
+
+    protected ServiceManagerImpl createServiceManager() {
+        return new ServiceManagerImpl(this);
+    }
 
     public NodeEngineImpl(final Node node) {
         this.node = node;
@@ -99,20 +117,14 @@ public class NodeEngineImpl implements NodeEngine {
         ProbeLevel probeLevel = node.getGroupProperties().getEnum(PERFORMANCE_METRICS_LEVEL, ProbeLevel.class);
         this.metricsRegistry = new MetricsRegistryImpl(node.getLogger(MetricsRegistryImpl.class), probeLevel);
         this.proxyService = new ProxyServiceImpl(this);
-        this.serviceManager = new ServiceManagerImpl(this);
+        this.serviceManager = createServiceManager();
         this.executionService = new ExecutionServiceImpl(this);
         this.operationService = new OperationServiceImpl(this);
         this.eventService = new EventServiceImpl(this);
         this.waitNotifyService = new WaitNotifyServiceImpl(this);
         this.transactionManagerService = new TransactionManagerServiceImpl(this);
         this.wanReplicationService = node.getNodeExtension().createService(WanReplicationService.class);
-        this.packetDispatcher = new PacketDispatcherImpl(
-                logger,
-                operationService,
-                eventService,
-                wanReplicationService,
-                new ConnectionManagerPacketHandler()
-        );
+        this.packetDispatcher = createPacketDispatcher();
         quorumService = new QuorumServiceImpl(this);
     }
 

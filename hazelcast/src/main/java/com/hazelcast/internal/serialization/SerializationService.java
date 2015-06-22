@@ -65,6 +65,8 @@ public interface SerializationService {
 
     ObjectDataInputStream createObjectDataInputStream(InputStream in);
 
+    PartitioningStrategy getGlobalPartitionStrategy();
+
     void register(Class type, Serializer serializer);
 
     void registerGlobal(Serializer serializer);

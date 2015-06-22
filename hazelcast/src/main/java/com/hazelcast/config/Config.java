@@ -42,7 +42,7 @@ import static java.text.MessageFormat.format;
 /**
  * Contains all the configuration to start a {@link com.hazelcast.core.HazelcastInstance}. A Config
  * can be created programmatically, but can also be configured using XML, see {@link com.hazelcast.config.XmlConfigBuilder}.
- * <p/>
+ * <p>
  * Config instances can be shared between threads, but should not be modified after they are used to
  * create HazelcastInstances.
  */
@@ -92,6 +92,8 @@ public class Config {
 
     private final Map<String, JobTrackerConfig> jobTrackerConfigs = new ConcurrentHashMap<String, JobTrackerConfig>();
 
+    private final Map<String, YarnApplicationConfig> yarnApplicationConfigs = new ConcurrentHashMap<String, YarnApplicationConfig>();
+
     private final Map<String, QuorumConfig> quorumConfigs = new ConcurrentHashMap<String, QuorumConfig>();
 
     private final Map<String, RingbufferConfig> ringbufferConfigs = new ConcurrentHashMap<String, RingbufferConfig>();
@@ -138,12 +140,12 @@ public class Config {
     /**
      * Sets the class-loader to be used during de-serialization
      * and as context class-loader of Hazelcast internal threads.
-     * <p/>
-     * <p/>
+     * <p>
+     * <p>
      * If not set (or set to null); thread context class-loader
      * will be used in required places.
-     * <p/>
-     * <p/>
+     * <p>
+     * <p>
      * Default value is null.
      *
      * @param classLoader class-loader to be used during de-serialization
@@ -847,6 +849,36 @@ public class Config {
         return getJobTrackerConfig(name);
     }
 
+    public YarnApplicationConfig findYarnApplicationConfig(String name) {
+        String baseName = getBaseName(name);
+        YarnApplicationConfig config = lookupByPattern(yarnApplicationConfigs, baseName);
+        if (config != null) {
+            return config.getAsReadOnly();
+        }
+        return getYarnApplicationConfig(name);
+    }
+
+    public YarnApplicationConfig getYarnApplicationConfig(String name) {
+        String baseName = getBaseName(name);
+        YarnApplicationConfig config = lookupByPattern(yarnApplicationConfigs, baseName);
+        if (config != null) {
+            return config;
+        }
+        YarnApplicationConfig defConfig = yarnApplicationConfigs.get("default");
+        if (defConfig == null) {
+            defConfig = new YarnApplicationConfig("default");
+            addYarnApplicationConfig(defConfig);
+        }
+        config = new YarnApplicationConfig(defConfig, name);
+        addYarnApplicationConfig(config);
+        return config;
+    }
+
+    private Config addYarnApplicationConfig(YarnApplicationConfig yarnApplicationConfig) {
+        yarnApplicationConfigs.put(yarnApplicationConfig.getName(), yarnApplicationConfig);
+        return this;
+    }
+
     public JobTrackerConfig getJobTrackerConfig(String name) {
         String baseName = getBaseName(name);
         JobTrackerConfig config = lookupByPattern(jobTrackerConfigs, baseName);
@@ -913,7 +945,6 @@ public class Config {
         }
         return getQuorumConfig("default");
     }
-
 
 
     public Config setQuorumConfigs(Map<String, QuorumConfig> quorumConfigs) {

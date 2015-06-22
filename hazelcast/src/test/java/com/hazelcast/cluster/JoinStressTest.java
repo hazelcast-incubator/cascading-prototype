@@ -16,7 +16,6 @@
 
 package com.hazelcast.cluster;
 
-import com.hazelcast.cluster.impl.ClusterServiceImpl;
 import com.hazelcast.cluster.impl.operations.MemberInfoUpdateOperation;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.JoinConfig;

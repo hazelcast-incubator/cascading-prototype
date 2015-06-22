@@ -26,7 +26,6 @@ import com.hazelcast.transaction.TransactionContext;
 import com.hazelcast.transaction.TransactionException;
 import com.hazelcast.transaction.TransactionOptions;
 import com.hazelcast.transaction.TransactionalTask;
-
 import java.util.Collection;
 import java.util.concurrent.ConcurrentMap;
 
@@ -119,7 +118,7 @@ public interface HazelcastInstance {
      * So keys are considered equals cluster-wide as long as
      * they are serialized to the same byte array such as String, long,
      * Integer.
-     * <p/>
+     * <p>
      * Locks are fail-safe. If a member holds a lock and some of the
      * members go down, the cluster will keep your locks safe and available.
      * Moreover, when a member leaves the cluster, all the locks acquired
@@ -169,15 +168,14 @@ public interface HazelcastInstance {
 
     /**
      * Returns the local Endpoint which this HazelcastInstance belongs to.
-     * <p/>
-     *
+     * <p>
+     * <p>
      * Returned endpoint will be a {@link Member} instance for cluster nodes
      * and a {@link Client} instance for clients.
      *
+     * @return the local {@link Endpoint} which this HazelcastInstance belongs to
      * @see Member
      * @see Client
-     *
-     * @return the local {@link Endpoint} which this HazelcastInstance belongs to
      */
     Endpoint getLocalEndpoint();
 
@@ -200,9 +198,8 @@ public interface HazelcastInstance {
      * and returns the result of the task.
      *
      * @param task the transactional task to be executed
-     * @param <T> return type of task
+     * @param <T>  return type of task
      * @return result of the transactional task
-     *
      * @throws TransactionException if an error occurs during transaction.
      */
     <T> T executeTransaction(TransactionalTask<T> task) throws TransactionException;
@@ -212,10 +209,9 @@ public interface HazelcastInstance {
      * and returns the result of the task.
      *
      * @param options options for this transactional task
-     * @param task task to be executed
-     * @param <T> return type of task
+     * @param task    task to be executed
+     * @param <T>     return type of task
      * @return result of the transactional task
-     *
      * @throws TransactionException if an error occurs during transaction.
      */
     <T> T executeTransaction(TransactionOptions options, TransactionalTask<T> task) throws TransactionException;
@@ -325,7 +321,7 @@ public interface HazelcastInstance {
 
     /**
      * Returns the quorum service of this Hazelcast instance.
-     * <p/>
+     * <p>
      * Quorum service can be used to retrieve quorum callbacks which let you to notify quorum results of your own to
      * the cluster quorum service.
      *
@@ -361,7 +357,6 @@ public interface HazelcastInstance {
     LifecycleService getLifecycleService();
 
     /**
-     *
      * @param serviceName name of the service
      * @param name name of the object
      * @param <T> type of the DistributedObject
@@ -375,7 +370,7 @@ public interface HazelcastInstance {
      * obtained by implementing a {@link HazelcastInstanceAware} interface when submitting a Runnable/Callable to
      * Hazelcast ExecutorService. By storing the dependencies in the user-context, they can be retrieved as soon
      * as you have a reference to the HazelcastInstance.
-     * <p/>
+     * <p>
      * This structure is purely local and Hazelcast remains agnostic abouts its content.
      *
      * @return a ConcurrentMap that can be used to add user-context to the HazelcastInstance.

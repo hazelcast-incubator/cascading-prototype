@@ -16,17 +16,17 @@
 
 package com.hazelcast.core;
 
+import java.util.Set;
+
 import com.hazelcast.config.Config;
 import com.hazelcast.instance.HazelcastInstanceFactory;
 import com.hazelcast.instance.OutOfMemoryErrorDispatcher;
 
-import java.util.Set;
 
 /**
  * Factory for {@link HazelcastInstance}'s, a node in a cluster.
  */
 public final class Hazelcast {
-
     private Hazelcast() {
     }
 
@@ -38,14 +38,14 @@ public final class Hazelcast {
      * @see #newHazelcastInstance(Config)
      */
     public static void shutdownAll() {
-        HazelcastInstanceFactory.shutdownAll();
+        HazelcastInstanceFactory.INSTANCE.shutdownAll();
     }
 
     /**
      * Creates a new HazelcastInstance (a new node in a cluster).
      * This method allows you to create and run multiple instances
      * of Hazelcast cluster members on the same JVM.
-     * <p/>
+     * <p>
      * To shutdown all running HazelcastInstances (all members on this JVM)
      * call {@link #shutdownAll()}.
      *
@@ -55,26 +55,26 @@ public final class Hazelcast {
      * @see #getHazelcastInstanceByName(String)
      */
     public static HazelcastInstance newHazelcastInstance(Config config) {
-        return HazelcastInstanceFactory.newHazelcastInstance(config);
+        return HazelcastInstanceFactory.INSTANCE.newHazelcastInstance(config);
     }
 
     /**
      * Creates a new HazelcastInstance (a new node in a cluster).
      * This method allows you to create and run multiple instances
      * of Hazelcast cluster members on the same JVM.
-     * <p/>
+     * <p>
      * To shutdown all running HazelcastInstances (all members on this JVM)
      * call {@link #shutdownAll()}.
-     *
+     * <p>
      * Hazelcast will look into two places for the configuration file:
      * <ol>
-     *     <li>
-     *         System property: Hazelcast will first check if "hazelcast.config" system property is set to a file path.
-     *         Example: -Dhazelcast.config=C:/myhazelcast.xml.
-     *     </li>
-     *     <li>
-     *         Classpath: If config file is not set as a system property, Hazelcast will check classpath for hazelcast.xml file.
-     *     </li>
+     * <li>
+     * System property: Hazelcast will first check if "hazelcast.config" system property is set to a file path.
+     * Example: -Dhazelcast.config=C:/myhazelcast.xml.
+     * </li>
+     * <li>
+     * Classpath: If config file is not set as a system property, Hazelcast will check classpath for hazelcast.xml file.
+     * </li>
      * </ol>
      * If Hazelcast doesn't find any config file, it will start with the default configuration (hazelcast-default.xml)
      * located in hazelcast.jar.
@@ -84,12 +84,12 @@ public final class Hazelcast {
      * @see #getHazelcastInstanceByName(String)
      */
     public static HazelcastInstance newHazelcastInstance() {
-        return HazelcastInstanceFactory.newHazelcastInstance(null);
+        return HazelcastInstanceFactory.INSTANCE.newHazelcastInstance(null);
     }
 
     /**
      * Returns an existing HazelcastInstance with instanceName.
-     * <p/>
+     * <p>
      * To shutdown all running HazelcastInstances (all members on this JVM)
      * call {@link #shutdownAll()}.
      *
@@ -99,27 +99,27 @@ public final class Hazelcast {
      * @see #shutdownAll()
      */
     public static HazelcastInstance getHazelcastInstanceByName(String instanceName) {
-        return HazelcastInstanceFactory.getHazelcastInstance(instanceName);
+        return HazelcastInstanceFactory.INSTANCE.getHazelcastInstance(instanceName);
     }
 
     /**
      * Gets or creates the HazelcastInstance with a certain name.
-     *
+     * <p>
      * If a Hazelcast instance with the same name as the configuration exists, then it is returned, otherwise it is created.
      *
      * @param config the Config.
      * @return the HazelcastInstance
-     * @throws NullPointerException if config is null.
+     * @throws NullPointerException     if config is null.
      * @throws IllegalArgumentException if the instance name of the config is null or empty.
      */
     public static HazelcastInstance getOrCreateHazelcastInstance(Config config) {
-        return HazelcastInstanceFactory.getOrCreateHazelcastInstance(config);
+        return HazelcastInstanceFactory.INSTANCE.getOrCreateHazelcastInstance(config);
     }
 
 
     /**
      * Returns all active/running HazelcastInstances on this JVM.
-     * <p/>
+     * <p>
      * To shutdown all running HazelcastInstances (all members on this JVM)
      * call {@link #shutdownAll()}.
      *
@@ -129,13 +129,13 @@ public final class Hazelcast {
      * @see #shutdownAll()
      */
     public static Set<HazelcastInstance> getAllHazelcastInstances() {
-        return HazelcastInstanceFactory.getAllHazelcastInstances();
+        return HazelcastInstanceFactory.INSTANCE.getAllHazelcastInstances();
     }
 
     /**
      * Sets <tt>OutOfMemoryHandler</tt> to be used when an <tt>OutOfMemoryError</tt>
      * is caught by Hazelcast threads.
-     *
+     * <p>
      * <p>
      * <b>Warning: </b> <tt>OutOfMemoryHandler</tt> may not be called although JVM throws
      * <tt>OutOfMemoryError</tt>.
@@ -144,7 +144,6 @@ public final class Hazelcast {
      * </p>
      *
      * @param outOfMemoryHandler set when an <tt>OutOfMemoryError</tt> is caught by Hazelcast threads
-     *
      * @see OutOfMemoryError
      * @see OutOfMemoryHandler
      */

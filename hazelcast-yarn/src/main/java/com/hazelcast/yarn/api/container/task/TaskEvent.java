@@ -1,0 +1,9 @@
+package com.hazelcast.yarn.api.container.task;
+
+public enum TaskEvent {
+    TASK_EXECUTION_COMPLETED,
+    TASK_READY_FOR_FINALIZATION,
+    TASK_EXECUTION_ERROR,
+    TASK_SUCCESSFULLY_INTERRUPTED,
+    TASK_INTERRUPTION_FAILED
+}

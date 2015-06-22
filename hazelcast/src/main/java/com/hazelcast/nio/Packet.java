@@ -31,7 +31,7 @@ import static com.hazelcast.nio.Bits.INT_SIZE_IN_BYTES;
  *
  * Since the Packet isn't used throughout the system, this design choice is visible locally.
  */
-public final class Packet extends HeapData implements OutboundFrame {
+public class Packet extends HeapData implements OutboundFrame {
 
     public static final byte VERSION = 4;
 
@@ -43,7 +43,7 @@ public final class Packet extends HeapData implements OutboundFrame {
     public static final int HEADER_BIND = 5;
 
     // The value of these constants is important. The order needs to match the order in the read/write process
-    private static final short PERSIST_VERSION = 1;
+    protected static final short PERSIST_VERSION = 1;
     private static final short PERSIST_HEADER = 2;
     private static final short PERSIST_PARTITION = 3;
     private static final short PERSIST_SIZE = 4;
@@ -51,9 +51,9 @@ public final class Packet extends HeapData implements OutboundFrame {
 
     private static final short PERSIST_COMPLETED = Short.MAX_VALUE;
 
-    private short header;
+    protected short header;
     private int partitionId;
-    private transient Connection conn;
+    protected transient Connection conn;
 
     // These 2 fields are only used during read/write. Otherwise they have no meaning.
     private int valueOffset;
@@ -178,7 +178,7 @@ public final class Packet extends HeapData implements OutboundFrame {
 
     // ========================= version =================================================
 
-    private boolean readVersion(ByteBuffer src) {
+    protected boolean readVersion(ByteBuffer src) {
         if (!isPersistStatusSet(PERSIST_VERSION)) {
             if (!src.hasRemaining()) {
                 return false;
@@ -193,7 +193,7 @@ public final class Packet extends HeapData implements OutboundFrame {
         return true;
     }
 
-    private boolean writeVersion(ByteBuffer dst) {
+    protected boolean writeVersion(ByteBuffer dst) {
         if (!isPersistStatusSet(PERSIST_VERSION)) {
             if (!dst.hasRemaining()) {
                 return false;
@@ -206,7 +206,7 @@ public final class Packet extends HeapData implements OutboundFrame {
 
     // ========================= header =================================================
 
-    private boolean readHeader(ByteBuffer src) {
+    protected boolean readHeader(ByteBuffer src) {
         if (!isPersistStatusSet(PERSIST_HEADER)) {
             if (src.remaining() < 2) {
                 return false;
@@ -217,7 +217,7 @@ public final class Packet extends HeapData implements OutboundFrame {
         return true;
     }
 
-    private boolean writeHeader(ByteBuffer dst) {
+    protected boolean writeHeader(ByteBuffer dst) {
         if (!isPersistStatusSet(PERSIST_HEADER)) {
             if (dst.remaining() < Bits.SHORT_SIZE_IN_BYTES) {
                 return false;
@@ -230,7 +230,7 @@ public final class Packet extends HeapData implements OutboundFrame {
 
     // ========================= partition =================================================
 
-    private boolean readPartition(ByteBuffer src) {
+    protected boolean readPartition(ByteBuffer src) {
         if (!isPersistStatusSet(PERSIST_PARTITION)) {
             if (src.remaining() < 4) {
                 return false;
@@ -242,7 +242,7 @@ public final class Packet extends HeapData implements OutboundFrame {
     }
 
 
-    private boolean writePartition(ByteBuffer dst) {
+    protected boolean writePartition(ByteBuffer dst) {
         if (!isPersistStatusSet(PERSIST_PARTITION)) {
             if (dst.remaining() < Bits.INT_SIZE_IN_BYTES) {
                 return false;
@@ -255,7 +255,7 @@ public final class Packet extends HeapData implements OutboundFrame {
 
     // ========================= size =================================================
 
-    private boolean readSize(ByteBuffer src) {
+    protected boolean readSize(ByteBuffer src) {
         if (!isPersistStatusSet(PERSIST_SIZE)) {
             if (src.remaining() < INT_SIZE_IN_BYTES) {
                 return false;
@@ -266,7 +266,7 @@ public final class Packet extends HeapData implements OutboundFrame {
         return true;
     }
 
-    private boolean writeSize(ByteBuffer dst) {
+    protected boolean writeSize(ByteBuffer dst) {
         if (!isPersistStatusSet(PERSIST_SIZE)) {
             if (dst.remaining() < INT_SIZE_IN_BYTES) {
                 return false;
@@ -280,7 +280,7 @@ public final class Packet extends HeapData implements OutboundFrame {
 
     // ========================= value =================================================
 
-    private boolean readValue(ByteBuffer src) {
+    protected boolean readValue(ByteBuffer src) {
         if (!isPersistStatusSet(PERSIST_VALUE)) {
             if (payload == null) {
                 payload = new byte[size];
@@ -315,7 +315,7 @@ public final class Packet extends HeapData implements OutboundFrame {
         return true;
     }
 
-    private boolean writeValue(ByteBuffer dst) {
+    protected boolean writeValue(ByteBuffer dst) {
         if (!isPersistStatusSet(PERSIST_VALUE)) {
             if (size > 0) {
                 // the number of bytes that can be written to the bb.
@@ -368,11 +368,11 @@ public final class Packet extends HeapData implements OutboundFrame {
         persistStatus = 0;
     }
 
-    private void setPersistStatus(short persistStatus) {
+    protected void setPersistStatus(short persistStatus) {
         this.persistStatus = persistStatus;
     }
 
-    private boolean isPersistStatusSet(short status) {
+    protected boolean isPersistStatusSet(short status) {
         return this.persistStatus >= status;
     }
 

@@ -18,6 +18,7 @@ package com.hazelcast.client.spi;
 
 import com.hazelcast.cache.impl.CacheService;
 import com.hazelcast.client.ClientExtension;
+import com.hazelcast.client.ClientYarnProxy;
 import com.hazelcast.client.cache.impl.ClientCacheDistributedObject;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ProxyFactoryConfig;

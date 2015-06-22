@@ -451,6 +451,11 @@ public class SerializationServiceImpl implements SerializationService {
     }
 
     @Override
+    public PartitioningStrategy getGlobalPartitionStrategy() {
+        return globalPartitioningStrategy;
+    }
+
+    @Override
     public final void register(Class type, Serializer serializer) {
         if (type == null) {
             throw new IllegalArgumentException("Class type information is required!");

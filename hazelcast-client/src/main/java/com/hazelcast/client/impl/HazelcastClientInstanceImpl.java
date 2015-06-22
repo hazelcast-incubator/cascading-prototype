@@ -95,7 +95,6 @@ import com.hazelcast.transaction.TransactionalTask;
 import com.hazelcast.transaction.impl.xa.XAService;
 import com.hazelcast.util.ExceptionUtil;
 import com.hazelcast.util.ServiceLoader;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;

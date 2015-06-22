@@ -24,7 +24,7 @@ import com.hazelcast.nio.Packet;
  * It provides an abstraction for different components that want to receive packets and handle them. For example an
  * OperationService that receive operation or operation-response packets.
  */
-public interface PacketHandler {
+public interface PacketHandler  {
 
     /**
      * Signals the PacketHandler that there is a packet to be handled.

@@ -50,7 +50,7 @@ final class ProxyEventProcessor implements StripedRunnable {
                     listener.distributedObjectDestroyed(event);
                     break;
                 default:
-                    throw new IllegalStateException("Unrecognized EventType:" + type);
+                    throw new IllegalStateException("Unrecognized StateMachineEventType:" + type);
             }
         }
     }

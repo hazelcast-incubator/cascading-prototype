@@ -127,6 +127,14 @@ public class Node {
 
     private final HazelcastThreadGroup hazelcastThreadGroup;
 
+    protected NodeEngineImpl createNodeEngine() {
+        return new NodeEngineImpl(this);
+    }
+
+    protected NodeExtension createNodeExtension() {
+        return NodeExtensionFactory.create(configClassLoader);
+    }
+
     public Node(HazelcastInstanceImpl hazelcastInstance, Config config, NodeContext nodeContext) {
         this.hazelcastInstance = hazelcastInstance;
         this.config = config;
@@ -151,13 +159,13 @@ public class Node {
             loggingService.setThisMember(localMember);
             logger = loggingService.getLogger(Node.class.getName());
             hazelcastThreadGroup = new HazelcastThreadGroup(hazelcastInstance.getName(), logger, configClassLoader);
-            nodeExtension = NodeExtensionFactory.create(configClassLoader);
+            nodeExtension = createNodeExtension();
             nodeExtension.beforeStart(this);
 
             serializationService = nodeExtension.createSerializationService();
             securityContext = config.getSecurityConfig().isEnabled() ? nodeExtension.getSecurityContext() : null;
 
-            nodeEngine = new NodeEngineImpl(this);
+            nodeEngine = createNodeEngine();
 
             clientEngine = new ClientEngineImpl(this);
             connectionManager = nodeContext.createConnectionManager(this, serverSocketChannel);
