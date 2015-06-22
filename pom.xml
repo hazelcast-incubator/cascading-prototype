@@ -36,6 +36,10 @@
         <module>hazelcast-spring</module>
         <module>hazelcast-cloud</module>
         <module>hazelcast-ra</module>
+        <module>hazelcast-jet</module>
+        <module>hazelcast-hadoop</module>
+        <module>hazelcast-stream</module>
+        <module>hazelcast-yarn</module>
         <module>hazelcast-build-utils</module>
         <module>hazelcast-code-generator</module>
     </modules>
@@ -74,7 +78,7 @@
         <maven.findbugs.plugin.version>3.0.0</maven.findbugs.plugin.version>
         <maven.checkstyle.plugin.version>2.12</maven.checkstyle.plugin.version>
         <maven.sonar.plugin.version>2.6</maven.sonar.plugin.version>
-        <maven.jacoco.plugin.version>0.7.4.201502262128</maven.jacoco.plugin.version>
+        <maven.jacoco.plugin.version>0.7.4.201602262128</maven.jacoco.plugin.version>
         <maven.cobertura.plugin.version>2.0</maven.cobertura.plugin.version>
 
         <log4j.version>1.2.12</log4j.version>
@@ -250,7 +254,7 @@
 
                     <!-- the argLine variable is needed for JaCoco -->
                     <argLine>
-                        -Xms128m -Xmx1G -XX:MaxPermSize=128M
+                        -Xms6G -Xmx6G -Xss4096K -XX:MaxPermSize=1024M -XX:NewSize=3G -XX:MaxNewSize=3G -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:ParallelGCThreads=8 -XX:SurvivorRatio=1 -XX:+PrintTenuringDistribution
                         -Dhazelcast.phone.home.enabled=false
                         -Dhazelcast.mancenter.enabled=false
                         -Dhazelcast.logging.type=none

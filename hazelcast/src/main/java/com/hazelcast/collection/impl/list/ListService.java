@@ -24,8 +24,12 @@ import com.hazelcast.core.DistributedObject;
 import com.hazelcast.spi.NodeEngine;
 import com.hazelcast.spi.Operation;
 import com.hazelcast.spi.PartitionReplicationEvent;
+import com.hazelcast.stream.IListStreamFactory;
 import com.hazelcast.transaction.impl.Transaction;
 
+import java.util.ServiceLoader;
+
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -36,8 +40,19 @@ public class ListService extends CollectionService {
 
     private final ConcurrentMap<String, ListContainer> containerMap = new ConcurrentHashMap<String, ListContainer>();
 
+    private final IListStreamFactory iListStreamFactory;
+
     public ListService(NodeEngine nodeEngine) {
         super(nodeEngine);
+
+        ServiceLoader serviceLoader = ServiceLoader.load(IListStreamFactory.class);
+        Iterator<IListStreamFactory> iterator = serviceLoader.iterator();
+
+        if (iterator.hasNext()) {
+            this.iListStreamFactory = iterator.next();
+        } else {
+            this.iListStreamFactory = null;
+        }
     }
 
     @Override
@@ -79,5 +94,9 @@ public class ListService extends CollectionService {
         return migrationData.isEmpty()
                 ? null
                 : new ListReplicationOperation(migrationData, event.getPartitionId(), event.getReplicaIndex());
+    }
+
+    public IListStreamFactory getiListStreamFactory() {
+        return iListStreamFactory;
     }
 }

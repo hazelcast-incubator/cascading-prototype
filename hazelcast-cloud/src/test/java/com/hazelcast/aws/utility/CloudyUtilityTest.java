@@ -88,12 +88,12 @@ public class CloudyUtilityTest {
     public void testIamRole() throws IOException {
         String s = "{\n" +
                 "  \"Code\" : \"Success\",\n" +
-                "  \"LastUpdated\" : \"2015-09-06T21:17:26Z\",\n" +
+                "  \"LastUpdated\" : \"2016-09-06T21:17:26Z\",\n" +
                 "  \"Type\" : \"AWS-HMAC\",\n" +
                 "  \"AccessKeyId\" : \"ASIAIEXAMPLEOXYDA\",\n" +
                 "  \"SecretAccessKey\" : \"hOCVge3EXAMPLExSJ+B\",\n" +
                 "  \"Token\" : \"AQoDYXdzEE4EXAMPLE2UGAFshkTsyw7gojLdiEXAMPLE+1SfSRTfLR\",\n" +
-                "  \"Expiration\" : \"2015-09-07T03:19:56Z\"\n}";
+                "  \"Expiration\" : \"2016-09-07T03:19:56Z\"\n}";
         StringReader sr = new StringReader(s);
         BufferedReader br = new BufferedReader(sr);
         AwsConfig awsConfig1 = new AwsConfig();
@@ -104,7 +104,7 @@ public class CloudyUtilityTest {
 
         Map map = describeInstances.parseIamRole(br);
         assertEquals("Success", map.get("Code"));
-        assertEquals("2015-09-06T21:17:26Z", map.get("LastUpdated"));
+        assertEquals("2016-09-06T21:17:26Z", map.get("LastUpdated"));
         assertEquals("AWS-HMAC", map.get("Type"));
         assertEquals("ASIAIEXAMPLEOXYDA", map.get("AccessKeyId"));
         assertEquals("hOCVge3EXAMPLExSJ+B", map.get("SecretAccessKey"));

@@ -56,7 +56,7 @@ public class LocalCacheStatsImplTest {
 
             @Override
             public long getLastAccessTime() {
-                return 2015;
+                return 2016;
             }
 
             @Override
@@ -133,7 +133,7 @@ public class LocalCacheStatsImplTest {
 
         assertEquals(1986, deserialized.getCreationTime());
         assertEquals(2014, deserialized.getLastUpdateTime());
-        assertEquals(2015, deserialized.getLastAccessTime());
+        assertEquals(2016, deserialized.getLastAccessTime());
         assertEquals(1000, deserialized.getOwnedEntryCount());
         assertEquals(127, deserialized.getCacheHits());
         assertEquals(12.5f, deserialized.getCacheHitPercentage(), 0.0001);

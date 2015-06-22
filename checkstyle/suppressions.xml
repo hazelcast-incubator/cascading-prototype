@@ -68,6 +68,13 @@
     <suppress checks="ClassDataAbstractionCoupling"
               files="com/hazelcast/cache/impl/DefaultOperationProvider"/>
 
+    <!-- JET -->
+    <suppress checks=".*" files="com/hazelcast/jet/impl/actor/ringbuffer"/>
+    <suppress checks="JavadocType" files="com/hazelcast/jet"/>
+    <suppress checks="JavadocMethod" files="com/hazelcast/jet"/>
+    <suppress checks="JavadocVariable" files="com/hazelcast/jet"/>
+    <suppress checks="MethodCount" files="com/hazelcast/jet/api/config"/>
+
     <!-- Core -->
     <suppress checks="JavadocMethod" files="com/hazelcast/core/"/>
     <suppress checks="JavadocType" files="com/hazelcast/core/"/>
