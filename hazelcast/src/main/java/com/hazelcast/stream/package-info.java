@@ -14,22 +14,7 @@
  * limitations under the License.
  */
 
-package com.hazelcast.spi.impl;
-
-import com.hazelcast.nio.Packet;
-
 /**
- * The {@link PacketHandler} is responsible for handling packets.
- *
- * It provides an abstraction for different components that want to receive packets and handle them. For example an
- * OperationService that receive operation or operation-response packets.
+ * Provides interfaces/classes for Hazelcast Stream.
  */
-public interface PacketHandler  {
-
-    /**
-     * Signals the PacketHandler that there is a packet to be handled.
-     *
-     * @param packet the response packet to handle
-     */
-    void handle(Packet packet) throws Exception;
-}
+package com.hazelcast.stream;

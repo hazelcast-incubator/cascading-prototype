@@ -54,7 +54,6 @@ import com.hazelcast.transaction.TransactionException;
 import com.hazelcast.transaction.TransactionOptions;
 import com.hazelcast.transaction.TransactionalTask;
 import com.hazelcast.util.ExceptionUtil;
-
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionMetaData;
@@ -309,7 +308,6 @@ public class HazelcastConnectionImpl implements HazelcastConnection {
     public String getName() {
         return getHazelcastInstance().getName();
     }
-
 
     @Override
     public ILock getLock(String key) {

@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package com.hazelcast.spi.impl;
+package com.hazelcast.config;
 
-import com.hazelcast.nio.Packet;
-
-/**
- * The {@link PacketHandler} is responsible for handling packets.
- *
- * It provides an abstraction for different components that want to receive packets and handle them. For example an
- * OperationService that receive operation or operation-response packets.
+/***
+ * Abstract interface which provide possibility to work with custom user configs
  */
-public interface PacketHandler  {
+public interface CustomServiceConfig {
+    /***
+     * @return read-only config
+     */
+    CustomServiceConfig getAsReadOnly();
 
     /**
-     * Signals the PacketHandler that there is a packet to be handled.
-     *
-     * @param packet the response packet to handle
+     * @return name of the config
      */
-    void handle(Packet packet) throws Exception;
+    String getName();
 }

@@ -252,7 +252,7 @@
 
                     <!-- the argLine variable is needed for JaCoco -->
                     <argLine>
-                        -Xms128m -Xmx1G -XX:MaxPermSize=128M
+                        -Xms6G -Xmx6G -Xss4096K -XX:MaxPermSize=1024M -XX:NewSize=3G -XX:MaxNewSize=3G -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:ParallelGCThreads=8 -XX:SurvivorRatio=1 -XX:+PrintTenuringDistribution
                         -Dhazelcast.phone.home.enabled=false
                         -Dhazelcast.mancenter.enabled=false
                         -Dhazelcast.logging.type=none

@@ -55,12 +55,12 @@ import com.hazelcast.transaction.TransactionalTask;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentMap;
 
-public final class HazelcastInstanceProxy implements HazelcastInstance, SerializationServiceSupport {
+public class HazelcastInstanceProxy implements HazelcastInstance, SerializationServiceSupport {
 
-    volatile HazelcastInstanceImpl original;
+    protected volatile HazelcastInstanceImpl original;
     private final String name;
 
-    HazelcastInstanceProxy(HazelcastInstanceImpl original) {
+    protected HazelcastInstanceProxy(HazelcastInstanceImpl original) {
         this.original = original;
         name = original.getName();
     }
@@ -255,7 +255,7 @@ public final class HazelcastInstanceProxy implements HazelcastInstance, Serializ
         return getOriginal().getSerializationService();
     }
 
-    private HazelcastInstanceImpl getOriginal() {
+    protected HazelcastInstanceImpl getOriginal() {
         final HazelcastInstanceImpl hazelcastInstance = original;
         if (hazelcastInstance == null) {
             throw new HazelcastInstanceNotActiveException();

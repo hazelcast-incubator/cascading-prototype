@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package com.hazelcast.spi.impl;
+package com.hazelcast.client;
 
-import com.hazelcast.nio.Packet;
+import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.client.impl.HazelcastClientProxy;
+import com.hazelcast.client.impl.HazelcastClientInstanceImpl;
+import com.hazelcast.client.impl.ClientConnectionManagerFactory;
 
-/**
- * The {@link PacketHandler} is responsible for handling packets.
- *
- * It provides an abstraction for different components that want to receive packets and handle them. For example an
- * OperationService that receive operation or operation-response packets.
- */
-public interface PacketHandler  {
+public interface HazelcastClientFactory<T extends HazelcastClientInstanceImpl, V extends HazelcastClientProxy> {
+    T createHazelcastInstanceClient(ClientConfig config,
+                                    ClientConnectionManagerFactory hazelcastClientFactory);
 
-    /**
-     * Signals the PacketHandler that there is a packet to be handled.
-     *
-     * @param packet the response packet to handle
-     */
-    void handle(Packet packet) throws Exception;
+    V createProxy(T client);
 }

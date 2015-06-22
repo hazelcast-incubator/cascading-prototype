@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package com.hazelcast.spi.impl;
+package com.hazelcast.stream;
 
-import com.hazelcast.nio.Packet;
-
-/**
- * The {@link PacketHandler} is responsible for handling packets.
- *
- * It provides an abstraction for different components that want to receive packets and handle them. For example an
- * OperationService that receive operation or operation-response packets.
+/***
+ * Stream factory to work with IList under IList
  */
-public interface PacketHandler  {
-
-    /**
-     * Signals the PacketHandler that there is a packet to be handled.
-     *
-     * @param packet the response packet to handle
-     */
-    void handle(Packet packet) throws Exception;
+public interface IListStreamFactory extends StreamFactory {
 }
