@@ -297,12 +297,14 @@ public class DefaultTupleTask implements ContainerTask {
             payload.set(false);
             return true;
         }
-
+        
         boolean success = processor.process();
         boolean activity = processor.consumed() || processor.produced();
         payload.set(activity);
 
         if (((!activity) && (success))) {
+            this.checkActiveProducers(processor);
+
             if (processor.isFinalized()) {
                 this.closeSenders();
 
@@ -314,15 +316,8 @@ public class DefaultTupleTask implements ContainerTask {
                 if (this.activeProducersCounter.get() <= 0) {
                     this.finalizeSenders();
 
-                    if ((!processor.hasActiveConsumers()) && (!processor.hasActiveProducers())) {
-                        this.finalizedReceiversCounter.set(0);
-                    }
-
                     if (this.finalizedReceiversCounter.get() <= 0) {
-                        if (!this.containerFinalizationNotified) {
-                            this.container.handleTaskEvent(this, TaskEvent.TASK_READY_FOR_FINALIZATION);
-                            this.containerFinalizationNotified = true;
-                        }
+                        this.notifyFinalizationStarted();
 
                         if (this.finalizationStarted) {
                             processor.startFinalization();
@@ -335,6 +330,20 @@ public class DefaultTupleTask implements ContainerTask {
         return true;
     }
 
+    private void checkActiveProducers(TaskProcessor processor) {
+        if ((!processor.hasActiveProducers())) {
+            this.activeProducersCounter.set(0);
+            this.finalizedReceiversCounter.set(0);
+            this.closedReceiversCounter.set(0);
+        }
+    }
+
+    private void notifyFinalizationStarted() {
+        if (!this.containerFinalizationNotified) {
+            this.container.handleTaskEvent(this, TaskEvent.TASK_READY_FOR_FINALIZATION);
+            this.containerFinalizationNotified = true;
+        }
+    }
 
     private void finalizeSenders() {
         if (!this.sendersFinalizationNotified) {
