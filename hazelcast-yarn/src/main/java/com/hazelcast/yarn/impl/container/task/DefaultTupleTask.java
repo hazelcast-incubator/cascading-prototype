@@ -297,7 +297,7 @@ public class DefaultTupleTask implements ContainerTask {
             payload.set(false);
             return true;
         }
-        
+
         boolean success = processor.process();
         boolean activity = processor.consumed() || processor.produced();
         payload.set(activity);
