@@ -112,6 +112,7 @@ public class WordCounterProcessor implements TupleContainerProcessor<String, Int
 
             System.out.println("Caches cleared");
             caches.clear();
+            processCounter.set(0);
         }
     }
 

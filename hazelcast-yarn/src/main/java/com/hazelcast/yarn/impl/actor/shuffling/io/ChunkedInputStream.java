@@ -1,10 +1,9 @@
 package com.hazelcast.yarn.impl.actor.shuffling.io;
 
-import java.util.Queue;
 import java.util.Arrays;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.BlockingQueue;
 
 import com.hazelcast.internal.serialization.impl.HeapData;
 
@@ -15,9 +14,9 @@ public class ChunkedInputStream extends InputStream {
     private int bufferIdx = 0;
 
     private volatile boolean interrupted = false;
-    private final Queue<byte[]> queue;
+    private final BlockingQueue<byte[]> queue;
 
-    public ChunkedInputStream(Queue<byte[]> queue) {
+    public ChunkedInputStream(BlockingQueue<byte[]> queue) {
         this.queue = queue;
     }
 
@@ -27,13 +26,16 @@ public class ChunkedInputStream extends InputStream {
             return -1;
         }
 
-        while (this.buffer == null) {
+        while ((this.buffer == null) || (this.buffer.length == 0)) {
             if (this.interrupted) {
                 return -1;
             }
 
-            this.buffer = this.queue.poll();
-            LockSupport.parkNanos(100);
+            try {
+                this.buffer = this.queue.take();
+            } catch (InterruptedException e) {
+
+            }
         }
 
         if (this.bufferIdx == this.buffer.length - BUFFER_OFFSET - 1) {
@@ -58,13 +60,16 @@ public class ChunkedInputStream extends InputStream {
 
     public void onOpen() {
         this.interrupted = false;
+
         if (this.buffer != null) {
             Arrays.fill(this.buffer, (byte) 0);
         }
+
         this.bufferIdx = 0;
     }
 
     public void markInterrupted() {
         this.interrupted = true;
+        this.queue.offer(new byte[0]);
     }
 }

@@ -1,10 +1,11 @@
 package com.hazelcast.yarn.impl.actor.shuffling.io;
 
 import java.util.List;
-import java.util.Queue;
 import java.io.IOException;
 
 import com.hazelcast.logging.ILogger;
+
+import java.util.concurrent.BlockingQueue;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.yarn.api.dag.Vertex;
@@ -12,14 +13,12 @@ import com.hazelcast.yarn.api.tuple.Tuple;
 import com.hazelcast.spi.impl.NodeEngineImpl;
 import com.hazelcast.yarn.api.actor.Consumer;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.hazelcast.yarn.api.actor.TupleProducer;
 import com.hazelcast.config.YarnApplicationConfig;
-
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import com.hazelcast.yarn.api.container.ContainerContext;
 import com.hazelcast.yarn.api.tuple.CompletionAwareProducer;
 import com.hazelcast.yarn.api.application.ApplicationContext;
@@ -30,7 +29,7 @@ public class ShufflingReceiver implements TupleProducer, Consumer<byte[]>, Compl
     private final int chunkSize;
     private final ILogger logger;
     private final ObjectDataInput in;
-    private final Queue<byte[]> bytesQueue;
+    private final BlockingQueue<byte[]> bytesQueue;
     private final ContainerContext containerContext;
     private final ApplicationMaster applicationMaster;
     private final List<ProducerCompletionHandler> handlers = new CopyOnWriteArrayList<ProducerCompletionHandler>();
@@ -57,7 +56,7 @@ public class ShufflingReceiver implements TupleProducer, Consumer<byte[]>, Compl
         ApplicationContext applicationContext = containerContext.getApplicationContext();
         YarnApplicationConfig yarnApplicationConfig = nodeEngine.getConfig().getYarnApplicationConfig(applicationContext.getName());
         this.chunkSize = yarnApplicationConfig.getTupleChunkSize();
-        this.bytesQueue = new ConcurrentLinkedQueue<byte[]>();
+        this.bytesQueue = new ArrayBlockingQueue<byte[]>(this.chunkSize);
         this.logger = nodeEngine.getLogger(ShufflingReceiver.class);
         this.chunkReceiver = new ChunkedInputStream(this.bytesQueue);
         this.in = nodeEngine.getSerializationService().createObjectDataInputStream(this.chunkReceiver);

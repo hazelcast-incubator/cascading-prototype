@@ -110,6 +110,7 @@ public class WordCountCollectorProcessor implements TupleContainerProcessor<Stri
 
             System.out.println("Collector Caches cleared");
             caches.clear();
+            processCounter.set(0);
         }
     }
 
