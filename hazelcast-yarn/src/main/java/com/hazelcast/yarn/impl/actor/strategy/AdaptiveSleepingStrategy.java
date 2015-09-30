@@ -15,9 +15,7 @@ public class AdaptiveSleepingStrategy implements SleepingStrategy {
 
     private long nextSleepingDurationNanos(boolean loaded) {
         if (loaded) {
-            if ((power > 0)) {
-                power--;
-            }
+            power = 1;
         } else {
             if (power < MAX_POWER_OF_TWO) {
                 power++;
