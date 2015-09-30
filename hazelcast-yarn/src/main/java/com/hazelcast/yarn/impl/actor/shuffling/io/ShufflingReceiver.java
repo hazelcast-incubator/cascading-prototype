@@ -58,7 +58,7 @@ public class ShufflingReceiver implements TupleProducer, Consumer<byte[]>, Compl
         this.chunkSize = yarnApplicationConfig.getTupleChunkSize();
         this.bytesQueue = new ArrayBlockingQueue<byte[]>(this.chunkSize);
         this.logger = nodeEngine.getLogger(ShufflingReceiver.class);
-        this.chunkReceiver = new ChunkedInputStream(this.bytesQueue);
+        this.chunkReceiver = new ChunkedInputStream(this.bytesQueue , yarnApplicationConfig.getYarnSecondsToAwait());
         this.in = nodeEngine.getSerializationService().createObjectDataInputStream(this.chunkReceiver);
     }
 

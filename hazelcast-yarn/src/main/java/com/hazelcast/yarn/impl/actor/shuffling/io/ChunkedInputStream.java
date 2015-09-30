@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import com.hazelcast.internal.serialization.impl.HeapData;
 
@@ -15,9 +16,11 @@ public class ChunkedInputStream extends InputStream {
 
     private volatile boolean interrupted = false;
     private final BlockingQueue<byte[]> queue;
+    private final int yarnSecondsToAwait;
 
-    public ChunkedInputStream(BlockingQueue<byte[]> queue) {
+    public ChunkedInputStream(BlockingQueue<byte[]> queue, int yarnSecondsToAwait) {
         this.queue = queue;
+        this.yarnSecondsToAwait = yarnSecondsToAwait;
     }
 
     @Override
@@ -32,7 +35,7 @@ public class ChunkedInputStream extends InputStream {
             }
 
             try {
-                this.buffer = this.queue.take();
+                this.buffer = this.queue.poll(yarnSecondsToAwait , TimeUnit.SECONDS);
             } catch (InterruptedException e) {
 
             }

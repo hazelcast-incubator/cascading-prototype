@@ -77,7 +77,7 @@ public class WordCountRunner {
 
             application.submit(dag);
 
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < 10; i++) {
                 long t = System.currentTimeMillis();
                 application.execute().get();
                 System.out.println("TotalTime=" + (System.currentTimeMillis() - t));

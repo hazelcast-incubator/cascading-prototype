@@ -22,6 +22,8 @@ public class HzNodeStart {
         networkConfig.getJoin().getTcpIpConfig().setEnabled(true);
         List<String> list = new ArrayList<String>();
 
+        config.setProperty("hazelcast.operation.call.timeout.millis", "100000");
+
         Collections.addAll(list, nodes.split(";"));
 
         networkConfig.getJoin().getTcpIpConfig().setMembers(
