@@ -53,10 +53,6 @@ public class WordCountCollectorProcessor implements TupleContainerProcessor<Stri
                            String sourceName,
                            ContainerContext containerContext) throws Exception {
         for (Tuple<String, Integer> tuple : inputStream) {
-            if (tuple == null) {
-                System.out.println("size=" + inputStream.size() + " sourceName=" + sourceName);
-            }
-
             this.cache.adjustOrPutValue(tuple.getKey(0), tuple.getValue(0), tuple.getValue(0));
         }
 
