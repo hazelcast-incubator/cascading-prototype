@@ -9,7 +9,7 @@ public class AdaptiveSleepingStrategy implements SleepingStrategy {
 
     private int power = 1;
 
-    static long getDurationNanos(int power) {
+    private static long getDurationNanos(int power) {
         return (1L << power) * 1000L;
     }
 
