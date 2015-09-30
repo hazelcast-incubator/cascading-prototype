@@ -4,6 +4,7 @@ import com.hazelcast.nio.Address;
 import com.hazelcast.spi.NodeEngine;
 import com.hazelcast.yarn.api.dag.DAG;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.hazelcast.config.YarnApplicationConfig;
@@ -58,4 +59,8 @@ public interface ApplicationContext {
     ApplicationExecutor getTupleContainerStateMachineExecutor();
 
     ApplicationExecutor getApplicationMasterStateMachineExecutor();
+
+    void registerApplicationListener(ApplicationListener applicationListener);
+
+    List<ApplicationListener> getListeners();
 }

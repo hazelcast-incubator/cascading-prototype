@@ -1,18 +1,24 @@
 package com.hazelcast.yarn.impl.application;
 
+
+import java.util.List;
+
 import com.hazelcast.nio.Address;
 import com.hazelcast.spi.NodeEngine;
 import com.hazelcast.yarn.api.dag.DAG;
 
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.hazelcast.config.YarnApplicationConfig;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.hazelcast.yarn.impl.tap.sink.FileWrapper;
 import com.hazelcast.yarn.api.executor.ApplicationExecutor;
 import com.hazelcast.yarn.impl.executor.StateMachineExecutor;
 import com.hazelcast.yarn.api.application.ApplicationContext;
+import com.hazelcast.yarn.api.application.ApplicationListener;
 import com.hazelcast.yarn.impl.container.ApplicationMasterImpl;
 import com.hazelcast.yarn.impl.executor.DefaultApplicationExecutor;
 import com.hazelcast.yarn.api.statemachine.ApplicationStateMachine;
@@ -27,6 +33,7 @@ import com.hazelcast.yarn.impl.application.localization.LocalizationStorageFacto
 import com.hazelcast.yarn.impl.statemachine.application.ApplicationStateMachineImpl;
 import com.hazelcast.yarn.api.statemachine.application.ApplicationStateMachineFactory;
 import com.hazelcast.yarn.impl.statemachine.application.DefaultApplicationStateMachineRequestProcessor;
+
 
 public class ApplicationContextImpl implements ApplicationContext {
     private final String name;
@@ -43,6 +50,8 @@ public class ApplicationContextImpl implements ApplicationContext {
     private final ApplicationExecutor applicationMasterStateMachineExecutor;
     private final ApplicationExecutor containerStateMachineExecutor;
     private final ApplicationExecutor tapStateMachineExecutor;
+
+    private final List<ApplicationListener> listeners = new CopyOnWriteArrayList<ApplicationListener>();
 
     private static final ApplicationStateMachineFactory STATE_MACHINE_FACTORY = new ApplicationStateMachineFactory() {
         @Override
@@ -82,6 +91,13 @@ public class ApplicationContextImpl implements ApplicationContext {
         );
 
         this.config = nodeEngine.getConfig().getYarnApplicationConfig(this.name);
+
+        registerApplicationListener(new ApplicationListener() {
+            @Override
+            public void onApplicationExecuted(ApplicationContext applicationContext) {
+                FileWrapper.clearWrappers();
+            }
+        });
     }
 
     @Override
@@ -131,6 +147,15 @@ public class ApplicationContextImpl implements ApplicationContext {
     @Override
     public ApplicationExecutor getApplicationMasterStateMachineExecutor() {
         return this.applicationMasterStateMachineExecutor;
+    }
+
+    @Override
+    public void registerApplicationListener(ApplicationListener applicationListener) {
+        this.listeners.add(applicationListener);
+    }
+
+    public List<ApplicationListener> getListeners() {
+        return listeners;
     }
 
     @Override

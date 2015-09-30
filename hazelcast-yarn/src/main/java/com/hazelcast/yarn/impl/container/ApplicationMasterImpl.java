@@ -11,6 +11,7 @@ import com.hazelcast.nio.Address;
 import com.hazelcast.spi.NodeEngine;
 import com.hazelcast.logging.ILogger;
 
+import com.hazelcast.yarn.api.application.ApplicationListener;
 import com.hazelcast.yarn.api.dag.DAG;
 import com.hazelcast.yarn.api.dag.Vertex;
 import com.hazelcast.instance.MemberImpl;
@@ -189,6 +190,12 @@ public class ApplicationMasterImpl extends
     }
 
     public void addToExecutionMailBox(Object object) {
+        List<ApplicationListener> listeners = getApplicationContext().getListeners();
+
+        for (ApplicationListener listener : listeners) {
+            listener.onApplicationExecuted(this.getApplicationContext());
+        }
+
         BlockingQueue<Object> executionMailBox = this.executionMailBox.get();
 
         if (executionMailBox != null) {

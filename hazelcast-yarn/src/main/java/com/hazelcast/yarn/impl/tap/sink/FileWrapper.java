@@ -82,6 +82,10 @@ public class FileWrapper {
         }
     }
 
+    public static void clearWrappers() {
+        wrappers.clear();
+    }
+
     public FileWriter getFileWriter() {
         return this.fileWriter;
     }

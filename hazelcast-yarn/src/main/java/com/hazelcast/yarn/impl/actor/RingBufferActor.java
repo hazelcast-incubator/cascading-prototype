@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Arrays;
 
 import com.hazelcast.spi.NodeEngine;
+
 import com.hazelcast.yarn.api.dag.Edge;
 import com.hazelcast.yarn.api.dag.Vertex;
 import com.hazelcast.yarn.api.tuple.Tuple;
@@ -15,9 +16,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.hazelcast.config.YarnApplicationConfig;
 import com.hazelcast.yarn.api.container.ContainerTask;
 import com.hazelcast.yarn.api.tuple.io.TupleInputStream;
-import com.hazelcast.yarn.impl.tuple.io.DefaultTupleIOStream;
 import com.hazelcast.yarn.impl.actor.ringbuffer.RingBuffer;
 import com.hazelcast.yarn.api.application.ApplicationContext;
+import com.hazelcast.yarn.impl.tuple.io.DefaultTupleIOStream;
+import com.hazelcast.yarn.api.application.ApplicationListener;
 import com.hazelcast.yarn.api.actor.ProducerCompletionHandler;
 
 
@@ -34,6 +36,8 @@ public class RingBufferActor implements TupleActor {
     private final DefaultTupleIOStream flushBuffer;
     private final List<ProducerCompletionHandler> completionHandlers;
 
+    private volatile boolean isClosed;
+
     public RingBufferActor(NodeEngine nodeEngine,
                            ApplicationContext applicationContext,
                            ContainerTask task,
@@ -49,6 +53,13 @@ public class RingBufferActor implements TupleActor {
         this.flushBuffer = new DefaultTupleIOStream(new Tuple[tupleChunkSize]);
         this.completionHandlers = new CopyOnWriteArrayList<ProducerCompletionHandler>();
         this.ringBuffer = new RingBuffer<Tuple>(containerQueueSize, nodeEngine.getLogger(RingBufferActor.class));
+
+        applicationContext.registerApplicationListener(new ApplicationListener() {
+            @Override
+            public void onApplicationExecuted(ApplicationContext applicationContext) {
+                Arrays.fill(producerChunk, null);
+            }
+        });
     }
 
     private int flushChunk() {
@@ -173,17 +184,17 @@ public class RingBufferActor implements TupleActor {
 
     @Override
     public boolean isClosed() {
-        return false;
+        return this.isClosed;
     }
 
     @Override
     public void open() {
-
+        this.isClosed = false;
     }
 
     @Override
     public void close() {
-        Arrays.fill(this.producerChunk, null);
+        this.isClosed = true;
     }
 
     @Override
