@@ -2,7 +2,9 @@ package com.hazelcast.yarn.impl.tap.source;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import com.hazelcast.partition.strategy.StringPartitioningStrategy;
 import com.hazelcast.yarn.api.dag.Vertex;
 import com.hazelcast.yarn.api.tap.TapType;
 import com.hazelcast.yarn.api.tap.SourceTap;
@@ -12,8 +14,11 @@ import com.hazelcast.yarn.api.tuple.TupleFactory;
 import com.hazelcast.yarn.api.application.ApplicationContext;
 
 public class HazelcastSourceTap extends SourceTap {
+    private static AtomicInteger counter = new AtomicInteger(0);
+
     private final String name;
     private final TapType tapType;
+    private final int tapId = counter.incrementAndGet();
 
     public HazelcastSourceTap(String name, TapType tapType) {
         this.name = name;
@@ -42,7 +47,13 @@ public class HazelcastSourceTap extends SourceTap {
                 readers.add(HazelcastReaderFactory.getReader(this.tapType, this.name, applicationContext, -1, tupleFactory, vertex));
             }
         } else if (TapType.FILE == this.tapType) {
-            int partitionId = applicationContext.getNodeEngine().getPartitionService().getPartitions()[0].getPartitionId();
+            int partitionId = applicationContext.getNodeEngine().getPartitionService().getPartitionId(
+                    applicationContext.getNodeEngine().getSerializationService().toData(
+                            this.name + "_" + this.tapId,
+                            StringPartitioningStrategy.INSTANCE
+                    )
+            );
+
             readers.add(HazelcastReaderFactory.getReader(this.tapType, this.name, applicationContext, partitionId, tupleFactory, vertex));
         } else if (TapType.HD_FILE == this.tapType) {
             int partitionId = applicationContext.getNodeEngine().getPartitionService().getPartitions()[0].getPartitionId();

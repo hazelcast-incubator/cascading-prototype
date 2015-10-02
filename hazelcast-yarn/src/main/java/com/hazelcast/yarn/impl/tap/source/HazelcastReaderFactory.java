@@ -21,7 +21,7 @@ public class HazelcastReaderFactory {
             case HAZELCAST_MULTIMAP:
                 return new HazelcastMultiMapPartitionReader<K, V>(applicationContext, name, partitionId, tupleFactory, vertex);
             case FILE:
-                return new TupleFileReader(applicationContext, vertex, tupleFactory, name);
+                return new TupleFileReader(applicationContext, vertex, partitionId , tupleFactory, name);
             case HD_FILE:
                 return new HDTupleFileReader(applicationContext, vertex, tupleFactory, name);
             default:

@@ -51,6 +51,10 @@ public class YarnApplicationConfig {
 
     private int maxProcessingThreads = -1;
 
+    public void setShufflingBatchSizeBytes(int shufflingBatchSizeBytes) {
+        this.shufflingBatchSizeBytes = shufflingBatchSizeBytes;
+    }
+
     private int shufflingBatchSizeBytes = DEFAULT_SHUFFLING_BATCH_SIZE_BYTES;
 
     private PartitioningStrategyConfig partitioningStrategyConfig = new PartitioningStrategyConfig();

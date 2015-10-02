@@ -22,7 +22,8 @@ public class HzNodeStart {
         networkConfig.getJoin().getTcpIpConfig().setEnabled(true);
         List<String> list = new ArrayList<String>();
 
-        config.setProperty("hazelcast.operation.call.timeout.millis", "100000");
+        config.setProperty("hazelcast.operation.call.timeout.millis", "100000000");
+        config.setProperty("hazelcast.io.thread.count", "30");
 
         Collections.addAll(list, nodes.split(";"));
 
@@ -32,6 +33,7 @@ public class HzNodeStart {
 
         instance = YarnHazelcast.newHazelcastInstance(config);
 
+        instance.getConfig().getYarnApplicationConfig("testApplication").setShufflingBatchSizeBytes(1024 * 1024 * 100);
         instance.getConfig().getYarnApplicationConfig("testApplication").setTupleChunkSize(65536);
         instance.getConfig().getYarnApplicationConfig("testApplication").setContainerQueueSize(65536);
         instance.getConfig().getYarnApplicationConfig("testApplication").setYarnSecondsToAwait(100000);

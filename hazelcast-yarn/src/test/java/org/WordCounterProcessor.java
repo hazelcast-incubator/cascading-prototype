@@ -45,6 +45,7 @@ public class WordCounterProcessor implements TupleContainerProcessor<String, Int
         taskCounter.set(containerContext.getVertex().getDescriptor().getTaskCount());
         taskCount = containerContext.getVertex().getDescriptor().getTaskCount();
         caches.put(index, cache);
+        time = System.currentTimeMillis();
     }
 
     @Override
@@ -64,7 +65,7 @@ public class WordCounterProcessor implements TupleContainerProcessor<String, Int
                                      ContainerContext containerContext) throws Exception {
         boolean finalized = false;
 
-        System.out.println("finalizer");
+        System.out.println("firstfinalizer=" + (System.currentTimeMillis() - time));
 
         try {
             if (finalizationIterator == null) {
@@ -105,6 +106,8 @@ public class WordCounterProcessor implements TupleContainerProcessor<String, Int
 
     private void clearCaches() {
         if (taskCounter.decrementAndGet() <= 0) {
+            System.out.println("finalizer=" + (System.currentTimeMillis() - time));
+
             for (int i = 0; i < taskCount; i++) {
                 System.out.println("Cache " + i + " cleared");
                 caches.get(i).clear();

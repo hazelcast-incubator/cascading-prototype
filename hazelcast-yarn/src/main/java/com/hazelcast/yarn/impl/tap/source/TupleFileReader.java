@@ -14,9 +14,10 @@ public class TupleFileReader extends AbstractHazelcastReader<String, String> {
 
     public TupleFileReader(ApplicationContext applicationContext,
                            Vertex vertex,
+                           int partitionId,
                            TupleFactory tupleFactory,
                            String name) {
-        super(applicationContext, name, 0, tupleFactory, vertex);
+        super(applicationContext, name, partitionId, tupleFactory, vertex);
     }
 
     @Override

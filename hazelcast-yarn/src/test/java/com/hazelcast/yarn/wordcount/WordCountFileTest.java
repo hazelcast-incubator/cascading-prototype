@@ -32,7 +32,7 @@ public class WordCountFileTest {
             instance.getConfig().getYarnApplicationConfig("testApplication").setYarnSecondsToAwait(100000);
             instance.getConfig().getYarnApplicationConfig("testApplication").setTupleChunkSize(1000);
             instance.getConfig().getYarnApplicationConfig("testApplication").setContainerQueueSize(65536);
-            instance.getConfig().getYarnApplicationConfig("testApplication").setMaxProcessingThreads(2);
+            instance.getConfig().getYarnApplicationConfig("testApplication").setMaxProcessingThreads(Runtime.getRuntime().availableProcessors());
 
             Application application = instance.getYarnApplication("testApplication");
 
@@ -52,7 +52,7 @@ public class WordCountFileTest {
                             build()
             );
 
-            for (int i = 1; i <= 1; i++) {
+            for (int i = 1; i <= 271; i++) {
                 WordCounterProcessor.time = System.currentTimeMillis();
                 vertex1.addSourceFile("/hazelcast_work/partitions/file_1");
             }
