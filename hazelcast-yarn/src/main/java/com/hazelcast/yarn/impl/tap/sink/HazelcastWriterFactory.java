@@ -20,7 +20,7 @@ public class HazelcastWriterFactory {
             case HAZELCAST_MULTIMAP:
                 return new HazelcastMultiMapPartitionWriter(containerContext, partitionId, sinkTapWriteStrategy, name);
             case FILE:
-                return new TupleFileWriter(containerContext, FileWrapper.getWrapper(name));
+                return new TupleFileWriter(containerContext, FileWrapper.getWrapper(name), partitionId);
             case HD_FILE:
                 return new HDTupleFileWriter(containerContext, HDFileManager.getWrapper(name));
             default:

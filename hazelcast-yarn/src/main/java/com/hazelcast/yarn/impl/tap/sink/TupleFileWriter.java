@@ -12,8 +12,9 @@ import com.hazelcast.partition.strategy.StringPartitioningStrategy;
 public class TupleFileWriter extends AbstractHazelcastWriter {
     private final FileWrapper fileWrapper;
 
-    public TupleFileWriter(ContainerContext containerContext, FileWrapper fileWrapper) {
-        super(containerContext, 0, SinkTapWriteStrategy.CLEAR_AND_REPLACE);
+
+    public TupleFileWriter(ContainerContext containerContext, FileWrapper fileWrapper, int partitionID) {
+        super(containerContext, partitionID, SinkTapWriteStrategy.CLEAR_AND_REPLACE);
         this.fileWrapper = fileWrapper;
         this.fileWrapper.registerWriter();
     }

@@ -23,7 +23,7 @@ public class YarnApplicationConfig {
 
     private static final int DEFAULT_STREAM_CHUNK_SIZE = 256;
 
-    private static final int DEFAULT_SHUFFLING_BATCH_SIZE_BYTES = 1024 * 1024;
+    private static final int DEFAULT_SHUFFLING_BATCH_SIZE_BYTES = 256;
 
     private static final int DEFAULT_MAX_SHUFFLING_QUEUE_FAILURES_ATTEMPTS = 10;
 

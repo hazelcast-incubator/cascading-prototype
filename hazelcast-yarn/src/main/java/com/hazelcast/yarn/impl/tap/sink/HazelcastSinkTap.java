@@ -56,7 +56,13 @@ public class HazelcastSinkTap extends SinkTap {
                     )
             );
         } else if (TapType.FILE == tapType) {
-            int partitionId = nodeEngine.getPartitionService().getPartitions()[0].getPartitionId();
+            int partitionId = 0;
+
+            for (InternalPartition partition : nodeEngine.getPartitionService().getPartitions()) {
+                if (partition.getOwnerOrNull().equals(containerContext.getApplicationContext().getOwner())) {
+                    partitionId = partition.getPartitionId();
+                }
+            }
 
             writers.add(
                     HazelcastWriterFactory.getWriter(this.tapType, this.name, getTapStrategy(), containerContext, partitionId)
