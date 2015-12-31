@@ -16,19 +16,24 @@
 
 package com.hazelcast.jet.impl.statemachine.applicationmaster.requests;
 
-import com.hazelcast.jet.api.Dummy;
 import com.hazelcast.jet.api.statemachine.container.ContainerRequest;
 import com.hazelcast.jet.api.statemachine.container.applicationmaster.ApplicationMasterEvent;
 
-public class InvalidateApplicationRequest implements ContainerRequest<ApplicationMasterEvent, Dummy> {
+public class InvalidateApplicationRequest implements ContainerRequest<ApplicationMasterEvent, Throwable> {
+    private final Throwable payLoad;
+
+    public InvalidateApplicationRequest(Throwable payLoad) {
+        this.payLoad = payLoad;
+    }
+
     @Override
     public ApplicationMasterEvent getContainerEvent() {
         return ApplicationMasterEvent.INVALIDATE;
     }
 
     @Override
-    public Dummy getPayLoad() {
-        return Dummy.INSTANCE;
+    public Throwable getPayLoad() {
+        return this.payLoad;
     }
 }
 

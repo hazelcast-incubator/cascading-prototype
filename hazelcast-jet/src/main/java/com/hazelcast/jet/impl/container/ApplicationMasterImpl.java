@@ -19,7 +19,6 @@ package com.hazelcast.jet.impl.container;
 
 import java.util.Map;
 import java.util.List;
-import java.util.Queue;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -226,42 +225,35 @@ public class ApplicationMasterImpl extends
 
     public void invalidateApplicationLocal(Object reason) {
         if (this.invalidated.compareAndSet(false, true)) {
-            Throwable error;
-            if (reason instanceof JetPacket) {
-                JetPacket packet = (JetPacket) reason;
-                Address initiator = packet.getRemoteMember();
-
-                error = packet.toByteArray() == null
-                        ?
-                        new ApplicationInvalidatedException(initiator)
-                        :
-                        toException(initiator, (JetPacket) reason);
-            } else if (reason instanceof Address) {
-                error = new ApplicationInvalidatedException((Address) reason);
-            } else if (reason instanceof Throwable) {
-                error = new CombinedJetException(
-                        Arrays.asList(
-                                (Throwable) reason,
-                                new ApplicationInvalidatedException(getNodeEngine().getLocalMember().getAddress())
-                        )
-                );
-            } else {
-                error = new ApplicationInvalidatedException(reason, getNodeEngine().getLocalMember().getAddress());
-            }
-
-            handleContainerRequest(new InvalidateApplicationRequest());
-            addToExecutionMailBox(error);
-
-            for (Queue<Object> registrationFuture : this.registrations.values()) {
-                registrationFuture.offer(error);
-            }
-
-            BlockingQueue<Object> mailBox = this.interruptionFutureHolder.get();
-
-            if (mailBox != null) {
-                mailBox.offer(error);
-            }
+            Throwable error = getError(reason);
+            handleContainerRequest(new InvalidateApplicationRequest(error));
         }
+    }
+
+    private Throwable getError(Object reason) {
+        Throwable error;
+        if (reason instanceof JetPacket) {
+            JetPacket packet = (JetPacket) reason;
+            Address initiator = packet.getRemoteMember();
+
+            error = packet.toByteArray() == null
+                    ?
+                    new ApplicationInvalidatedException(initiator)
+                    :
+                    toException(initiator, (JetPacket) reason);
+        } else if (reason instanceof Address) {
+            error = new ApplicationInvalidatedException((Address) reason);
+        } else if (reason instanceof Throwable) {
+            error = new CombinedJetException(
+                    Arrays.asList(
+                            (Throwable) reason,
+                            new ApplicationInvalidatedException(getNodeEngine().getLocalMember().getAddress())
+                    )
+            );
+        } else {
+            error = new ApplicationInvalidatedException(reason, getNodeEngine().getLocalMember().getAddress());
+        }
+        return error;
     }
 
     private Throwable toException(Address initiator, JetPacket packet) {

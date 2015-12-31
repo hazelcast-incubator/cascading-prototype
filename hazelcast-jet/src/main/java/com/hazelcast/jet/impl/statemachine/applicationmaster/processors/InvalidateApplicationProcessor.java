@@ -16,12 +16,13 @@
 
 package com.hazelcast.jet.impl.statemachine.applicationmaster.processors;
 
-import com.hazelcast.jet.api.Dummy;
+import java.util.concurrent.BlockingQueue;
+
 import com.hazelcast.jet.api.container.DataContainer;
 import com.hazelcast.jet.api.container.ContainerPayLoadProcessor;
 import com.hazelcast.jet.api.container.applicationmaster.ApplicationMaster;
 
-public class InvalidateApplicationProcessor implements ContainerPayLoadProcessor<Dummy> {
+public class InvalidateApplicationProcessor implements ContainerPayLoadProcessor<Throwable> {
     private final ApplicationMaster applicationMaster;
 
     public InvalidateApplicationProcessor(ApplicationMaster applicationMaster) {
@@ -29,9 +30,18 @@ public class InvalidateApplicationProcessor implements ContainerPayLoadProcessor
     }
 
     @Override
-    public void process(Dummy payload) throws Exception {
-        for (DataContainer container : this.applicationMaster.containers()) {
-            container.invalidate();
+    public void process(Throwable error) throws Exception {
+        try {
+            for (DataContainer container : this.applicationMaster.containers()) {
+                container.invalidate();
+            }
+        } finally {
+            BlockingQueue<Object> executionMailBox =
+                    this.applicationMaster.getExecutionMailBox();
+
+            if (executionMailBox != null) {
+                executionMailBox.offer(error);
+            }
         }
     }
 }

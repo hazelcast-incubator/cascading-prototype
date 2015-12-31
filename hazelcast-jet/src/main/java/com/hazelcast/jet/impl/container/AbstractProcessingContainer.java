@@ -331,7 +331,7 @@ public abstract class AbstractProcessingContainer extends
     @Override
     public void invalidate() {
         for (ContainerTask task : this.containerTasks) {
-            task.markInvalidated();
+            task.interrupt();
         }
     }
 
@@ -345,6 +345,7 @@ public abstract class AbstractProcessingContainer extends
                                 this.tupleFactory
                         )
                 );
+
                 this.sourcesProducers.addAll(readers);
             }
         }

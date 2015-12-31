@@ -35,8 +35,6 @@ public interface ContainerTask extends Task {
 
     void interrupt();
 
-    void markInvalidated();
-
     void destroy();
 
     void beforeExecution();

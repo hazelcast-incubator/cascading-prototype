@@ -85,8 +85,6 @@ public class DefaultContainerTask implements ContainerTask {
 
     private volatile boolean interrupted = true;
 
-    private volatile boolean invalidated;
-
     private volatile TaskProcessor taskProcessor;
 
     private volatile boolean sendersClosed;
@@ -205,11 +203,6 @@ public class DefaultContainerTask implements ContainerTask {
     }
 
     @Override
-    public void markInvalidated() {
-        this.invalidated = true;
-    }
-
-    @Override
     public void destroy() {
         interruptTask();
     }
@@ -299,26 +292,43 @@ public class DefaultContainerTask implements ContainerTask {
     public boolean executeTask(Payload payload) {
         TaskProcessor processor = this.taskProcessor;
 
-        if (this.invalidated) {
-            closeActors();
-            this.interrupted = true;
-            return false;
-        }
-
         if (this.interrupted) {
             processor.reset();
 
             if (this.interruptionFuture != null) {
-                this.interruptionFuture.set(true);
+                try {
+                    this.processor.afterProcessing(this.processorContext);
+                } finally {
+                    this.interruptionFuture.set(true);
+                }
             }
 
             return false;
         }
 
+        boolean result;
+
         try {
-            return process(payload, processor);
+            result = process(payload, processor);
         } catch (Throwable error) {
-            return catchProcessingError(payload, error);
+            result = catchProcessingError(payload, error);
+        }
+
+        handleResult(result);
+        return result;
+    }
+
+    private void handleResult(boolean result) {
+        if (!result) {
+            try {
+                this.processor.afterProcessing(this.processorContext);
+            } catch (Throwable e) {
+                try {
+                    this.logger.warning(e.getMessage(), e);
+                } catch (Throwable ee) {
+                    //Noting to do
+                }
+            }
         }
     }
 
