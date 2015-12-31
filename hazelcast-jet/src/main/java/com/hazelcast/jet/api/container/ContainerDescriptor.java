@@ -16,18 +16,19 @@
 
 package com.hazelcast.jet.api.container;
 
-import com.hazelcast.jet.api.counters.Accumulator;
+import java.io.Serializable;
+
 import com.hazelcast.spi.NodeEngine;
 import com.hazelcast.jet.api.dag.DAG;
 import com.hazelcast.jet.api.dag.Vertex;
 import com.hazelcast.jet.api.data.io.DataType;
+import com.hazelcast.jet.api.counters.Accumulator;
 import com.hazelcast.jet.api.data.tuple.TupleFactory;
 import com.hazelcast.jet.api.data.io.ObjectReaderFactory;
 import com.hazelcast.jet.api.data.io.ObjectWriterFactory;
 import com.hazelcast.jet.api.config.JetApplicationConfig;
 import com.hazelcast.jet.api.application.ApplicationListener;
 
-import java.io.Serializable;
 
 public interface ContainerDescriptor {
     NodeEngine getNodeEngine();
@@ -61,7 +62,7 @@ public interface ContainerDescriptor {
 
     ObjectWriterFactory getObjectWriterFactory();
 
-    <V, R extends Serializable> Accumulator<V, R> getAccumulator(String counterName);
+    <V, R extends Serializable> Accumulator<V, R> getAccumulator(CounterKey counterKey);
 
-    <V, R extends Serializable> void setAccumulator(String counterName, Accumulator<V, R> accumulator);
+    <V, R extends Serializable> void setAccumulator(CounterKey counterKey, Accumulator<V, R> accumulator);
 }

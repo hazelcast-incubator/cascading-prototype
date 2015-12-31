@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.jet.api.data.io.SocketReader;
 import com.hazelcast.jet.api.data.io.SocketWriter;
 import com.hazelcast.jet.api.counters.Accumulator;
@@ -107,7 +108,7 @@ public class ApplicationContextImpl extends IOContextImpl implements Application
 
     private final ExecutorContext executorContext;
 
-    private final List<ConcurrentMap<String, Accumulator>> accumulators;
+    private final List<ConcurrentMap<CounterKey, Accumulator>> accumulators;
 
     public ApplicationContextImpl(String name,
                                   NodeEngine nodeEngine,
@@ -155,7 +156,7 @@ public class ApplicationContextImpl extends IOContextImpl implements Application
         );
 
         this.hzToAddressMapping = new HashMap<Address, Address>();
-        this.accumulators = new CopyOnWriteArrayList<ConcurrentMap<String, Accumulator>>();
+        this.accumulators = new CopyOnWriteArrayList<ConcurrentMap<CounterKey, Accumulator>>();
 
         this.applicationMaster = createApplicationMaster(nodeEngine);
     }
@@ -296,18 +297,18 @@ public class ApplicationContextImpl extends IOContextImpl implements Application
 
     @Override
     @SuppressWarnings("unchecked")
-    public Map<String, Accumulator> getAccumulators() {
-        Map<String, Accumulator> map = new HashMap<String, Accumulator>();
+    public Map<CounterKey, Accumulator> getAccumulators() {
+        Map<CounterKey, Accumulator> map = new HashMap<CounterKey, Accumulator>();
 
-        for (ConcurrentMap<String, Accumulator> concurrentMap : this.accumulators) {
-            for (Map.Entry<String, Accumulator> entry : concurrentMap.entrySet()) {
-                String counterName = entry.getKey();
+        for (ConcurrentMap<CounterKey, Accumulator> concurrentMap : this.accumulators) {
+            for (Map.Entry<CounterKey, Accumulator> entry : concurrentMap.entrySet()) {
+                CounterKey counterKey = entry.getKey();
                 Accumulator accumulator = entry.getValue();
 
-                Accumulator collector = map.get(counterName);
+                Accumulator collector = map.get(counterKey);
 
                 if (collector == null) {
-                    map.put(counterName, accumulator);
+                    map.put(counterKey, accumulator);
                 } else {
                     collector.merge(accumulator);
                 }
@@ -318,7 +319,7 @@ public class ApplicationContextImpl extends IOContextImpl implements Application
     }
 
     @Override
-    public void registerAccumulators(ConcurrentMap<String, Accumulator> accumulatorMap) {
+    public void registerAccumulators(ConcurrentMap<CounterKey, Accumulator> accumulatorMap) {
         this.accumulators.add(accumulatorMap);
     }
 }

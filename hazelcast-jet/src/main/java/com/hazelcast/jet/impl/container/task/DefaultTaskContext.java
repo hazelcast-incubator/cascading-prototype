@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.jet.api.counters.Accumulator;
 import com.hazelcast.jet.api.executor.TaskContext;
 import com.hazelcast.jet.api.application.ApplicationContext;
@@ -56,7 +57,7 @@ public class DefaultTaskContext implements TaskContext {
     }
 
     @Override
-    public <V, R extends Serializable> void setAccumulator(String counterName, Accumulator<V, R> accumulator) {
-        this.accumulatorMap.put(counterName, accumulator);
+    public <V, R extends Serializable> void setAccumulator(CounterKey counterKey, Accumulator<V, R> accumulator) {
+        this.accumulatorMap.put(counterKey, accumulator);
     }
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hazelcast.core.Member;
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.jet.api.counters.Accumulator;
 import com.hazelcast.jet.impl.operation.application.*;
 import com.hazelcast.nio.serialization.Data;
@@ -140,7 +141,7 @@ public class ServerApplicationClusterService extends AbstractApplicationClusterS
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Accumulator> readAccumulatorsResponse(Callable callable) throws Exception {
-        return (Map<String, Accumulator>) callable.call();
+    public Map<CounterKey, Accumulator> readAccumulatorsResponse(Callable callable) throws Exception {
+        return (Map<CounterKey, Accumulator>) callable.call();
     }
 }

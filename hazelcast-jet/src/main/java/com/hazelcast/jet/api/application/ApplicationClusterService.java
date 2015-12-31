@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.jet.api.counters.Accumulator;
 import com.hazelcast.jet.api.dag.DAG;
 import com.hazelcast.jet.api.config.JetApplicationConfig;
@@ -41,5 +42,5 @@ public interface ApplicationClusterService {
 
     Future finalizeApplication(ApplicationStateManager applicationStateManager);
 
-    Map<String, Accumulator> getAccumulators();
+    Map<CounterKey, Accumulator> getAccumulators();
 }

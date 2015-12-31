@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package com.hazelcast.jet.api.executor;
+package com.hazelcast.jet.api.container;
 
 import java.io.Serializable;
 
-import com.hazelcast.jet.api.container.CounterKey;
-import com.hazelcast.jet.api.counters.Accumulator;
-
-public interface TaskContext {
-    int getTaskCount();
-
-    int getTaskNumber();
-
-    <V, R extends Serializable> Accumulator<V, R> getAccumulator(CounterKey counterKey);
-
-    <V, R extends Serializable> void setAccumulator(CounterKey counterKey, Accumulator<V, R> accumulator);
+public interface CounterKey extends Serializable {
 }

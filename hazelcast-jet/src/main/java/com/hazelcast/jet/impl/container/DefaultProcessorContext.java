@@ -18,6 +18,7 @@ package com.hazelcast.jet.impl.container;
 
 import java.io.Serializable;
 
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.spi.NodeEngine;
 import com.hazelcast.jet.api.dag.DAG;
 import com.hazelcast.jet.api.dag.Vertex;
@@ -129,12 +130,12 @@ public class DefaultProcessorContext implements ProcessorContext {
     }
 
     @Override
-    public <V, R extends Serializable> Accumulator<V, R> getAccumulator(String counterName) {
-        return this.taskContext.getAccumulator(counterName);
+    public <V, R extends Serializable> Accumulator<V, R> getAccumulator(CounterKey counterKey) {
+        return this.taskContext.getAccumulator(counterKey);
     }
 
     @Override
-    public <V, R extends Serializable> void setAccumulator(String counterName, Accumulator<V, R> accumulator) {
-        this.taskContext.setAccumulator(counterName, accumulator);
+    public <V, R extends Serializable> void setAccumulator(CounterKey counterKey, Accumulator<V, R> accumulator) {
+        this.taskContext.setAccumulator(counterKey, accumulator);
     }
 }

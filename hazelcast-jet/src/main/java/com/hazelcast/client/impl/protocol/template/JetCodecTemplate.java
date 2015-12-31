@@ -21,6 +21,7 @@ import com.hazelcast.annotation.GenerateCodec;
 
 import java.util.Map;
 
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.nio.serialization.Data;
 import com.hazelcast.client.impl.protocol.ResponseMessageConst;
 
@@ -52,5 +53,5 @@ public interface JetCodecTemplate {
     void event(String name, Data event);
 
     @Request(id = 9, retryable = false, response = ResponseMessageConst.DATA)
-    Map<String, Object> getAccumulators(String name);
+    Map<CounterKey, Object> getAccumulators(String name);
 }

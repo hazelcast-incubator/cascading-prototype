@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.util.concurrent.Future;
 
 
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.jet.api.counters.Accumulator;
 import com.hazelcast.spi.NodeEngine;
 import com.hazelcast.jet.api.dag.DAG;
@@ -146,7 +147,7 @@ public class ApplicationProxyImpl extends AbstractDistributedObject<JetService> 
     }
 
     @Override
-    public Map<String, Accumulator> getAccumulators() {
+    public Map<CounterKey, Accumulator> getAccumulators() {
         return this.applicationClusterService.getAccumulators();
     }
 }

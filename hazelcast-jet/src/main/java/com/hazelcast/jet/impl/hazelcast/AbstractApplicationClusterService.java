@@ -26,6 +26,7 @@ import com.hazelcast.core.Member;
 
 import java.util.concurrent.Future;
 
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.jet.api.dag.DAG;
 
 import java.util.concurrent.Callable;
@@ -86,12 +87,12 @@ public abstract class AbstractApplicationClusterService<PayLoad>
 
     protected abstract <T> T toObject(com.hazelcast.nio.serialization.Data data);
 
-    protected abstract Map<String, Accumulator> readAccumulatorsResponse(Callable callable) throws Exception;
+    protected abstract Map<CounterKey, Accumulator> readAccumulatorsResponse(Callable callable) throws Exception;
 
     @SuppressWarnings("unchecked")
-    public Map<String, Accumulator> getAccumulators() {
+    public Map<CounterKey, Accumulator> getAccumulators() {
         Set<Member> members = this.getMembers();
-        Map<String, Accumulator> cache = new HashMap<String, Accumulator>();
+        Map<CounterKey, Accumulator> cache = new HashMap<CounterKey, Accumulator>();
 
         try {
             for (Member member : members) {
@@ -106,16 +107,16 @@ public abstract class AbstractApplicationClusterService<PayLoad>
                                 }
                         );
 
-                Map<String, Accumulator> memberResponse = readAccumulatorsResponse(callable);
+                Map<CounterKey, Accumulator> memberResponse = readAccumulatorsResponse(callable);
 
-                for (Map.Entry<String, Accumulator> entry : memberResponse.entrySet()) {
-                    String name = entry.getKey();
+                for (Map.Entry<CounterKey, Accumulator> entry : memberResponse.entrySet()) {
+                    CounterKey counterKey = entry.getKey();
                     Accumulator accumulator = entry.getValue();
 
-                    Accumulator collector = cache.get(name);
+                    Accumulator collector = cache.get(counterKey);
 
                     if (collector == null) {
-                        cache.put(name, accumulator);
+                        cache.put(counterKey, accumulator);
                     } else {
                         collector.merge(accumulator);
                     }

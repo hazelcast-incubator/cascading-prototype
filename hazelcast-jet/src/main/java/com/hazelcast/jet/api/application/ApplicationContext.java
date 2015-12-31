@@ -19,7 +19,6 @@ package com.hazelcast.jet.api.application;
 import java.util.Map;
 import java.util.List;
 
-import com.hazelcast.jet.api.counters.Accumulator;
 import com.hazelcast.nio.Address;
 import com.hazelcast.spi.NodeEngine;
 import com.hazelcast.jet.api.dag.DAG;
@@ -29,6 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.hazelcast.jet.api.data.io.SocketReader;
 import com.hazelcast.jet.api.data.io.SocketWriter;
+import com.hazelcast.jet.api.container.CounterKey;
+import com.hazelcast.jet.api.counters.Accumulator;
 import com.hazelcast.jet.api.container.ContainerListener;
 import com.hazelcast.jet.api.config.JetApplicationConfig;
 import com.hazelcast.jet.api.statemachine.ApplicationStateMachine;
@@ -97,7 +98,7 @@ public interface ApplicationContext extends IOContext {
 
     ExecutorContext getExecutorContext();
 
-    Map<String, Accumulator> getAccumulators();
+    Map<CounterKey, Accumulator> getAccumulators();
 
-    void registerAccumulators(ConcurrentMap<String, Accumulator> accumulatorMap);
+    void registerAccumulators(ConcurrentMap<CounterKey, Accumulator> accumulatorMap);
 }

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Future;
 
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.jet.api.counters.Accumulator;
 import com.hazelcast.jet.api.dag.DAG;
 import com.hazelcast.jet.impl.application.LocalizationResourceType;
@@ -107,5 +108,5 @@ public interface Application {
      *
      * @return map with accumulators
      */
-    Map<String, Accumulator> getAccumulators();
+    Map<CounterKey, Accumulator> getAccumulators();
 }

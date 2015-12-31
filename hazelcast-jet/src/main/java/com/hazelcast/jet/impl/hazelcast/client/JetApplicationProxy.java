@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Future;
 
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.jet.api.dag.DAG;
 
 import java.util.concurrent.Executors;
@@ -144,7 +145,7 @@ public class JetApplicationProxy extends ClientProxy implements ApplicationProxy
     }
 
     @Override
-    public Map<String, Accumulator> getAccumulators() {
+    public Map<CounterKey, Accumulator> getAccumulators() {
         return this.applicationClusterService.getAccumulators();
     }
 }

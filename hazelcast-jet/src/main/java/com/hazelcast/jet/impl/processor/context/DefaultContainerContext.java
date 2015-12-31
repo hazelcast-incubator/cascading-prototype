@@ -16,11 +16,18 @@
 
 package com.hazelcast.jet.impl.processor.context;
 
-import com.hazelcast.jet.api.counters.Accumulator;
+import java.io.Serializable;
+
 import com.hazelcast.spi.NodeEngine;
 import com.hazelcast.jet.api.dag.DAG;
 import com.hazelcast.jet.api.dag.Vertex;
+
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.hazelcast.jet.api.data.io.DataType;
+import com.hazelcast.jet.api.container.CounterKey;
+import com.hazelcast.jet.api.counters.Accumulator;
 import com.hazelcast.jet.api.data.tuple.TupleFactory;
 import com.hazelcast.jet.api.container.ContainerContext;
 import com.hazelcast.jet.api.data.io.ObjectReaderFactory;
@@ -30,9 +37,6 @@ import com.hazelcast.jet.api.config.JetApplicationConfig;
 import com.hazelcast.jet.api.application.ApplicationContext;
 import com.hazelcast.jet.api.application.ApplicationListener;
 
-import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class DefaultContainerContext implements ContainerContext {
     private final int id;
@@ -40,7 +44,7 @@ public class DefaultContainerContext implements ContainerContext {
     private final NodeEngine nodeEngine;
     private final TupleFactory tupleFactory;
     private final ApplicationContext applicationContext;
-    private final ConcurrentMap<String, Accumulator> accumulatorMap;
+    private final ConcurrentMap<CounterKey, Accumulator> accumulatorMap;
 
     public DefaultContainerContext(NodeEngine nodeEngine,
                                    ApplicationContext applicationContext,
@@ -52,7 +56,7 @@ public class DefaultContainerContext implements ContainerContext {
         this.nodeEngine = nodeEngine;
         this.tupleFactory = tupleFactory;
         this.applicationContext = applicationContext;
-        this.accumulatorMap = new ConcurrentHashMap<String, Accumulator>();
+        this.accumulatorMap = new ConcurrentHashMap<CounterKey, Accumulator>();
         applicationContext.registerAccumulators(this.accumulatorMap);
     }
 
@@ -138,13 +142,13 @@ public class DefaultContainerContext implements ContainerContext {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V, R extends Serializable> Accumulator<V, R> getAccumulator(String counterName) {
-        return this.accumulatorMap.get(counterName);
+    public <V, R extends Serializable> Accumulator<V, R> getAccumulator(CounterKey counterKey) {
+        return this.accumulatorMap.get(counterKey);
     }
 
     @Override
-    public <V, R extends Serializable> void setAccumulator(String counterName,
+    public <V, R extends Serializable> void setAccumulator(CounterKey counterKey,
                                                            Accumulator<V, R> accumulator) {
-        this.accumulatorMap.put(counterName, accumulator);
+        this.accumulatorMap.put(counterKey, accumulator);
     }
 }

@@ -22,6 +22,7 @@ import java.util.Set;
 
 
 import com.hazelcast.core.Member;
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.jet.api.counters.Accumulator;
 import com.hazelcast.jet.impl.Chunk;
 import com.hazelcast.jet.api.dag.DAG;
@@ -147,7 +148,7 @@ public class ClientApplicationClusterService
         return this.client.getSerializationService().toObject(data);
     }
 
-    public Map<String, Accumulator> readAccumulatorsResponse(Callable callable) throws Exception {
+    public Map<CounterKey, Accumulator> readAccumulatorsResponse(Callable callable) throws Exception {
         ClientMessage clientMessage = (ClientMessage) callable.call();
         JetGetAccumulatorsCodec.ResponseParameters responseParameters =
                 JetGetAccumulatorsCodec.decodeResponse(clientMessage);
