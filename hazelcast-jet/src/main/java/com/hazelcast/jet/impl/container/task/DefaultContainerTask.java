@@ -60,7 +60,6 @@ import com.hazelcast.jet.impl.actor.DefaultComposedActor;
 import com.hazelcast.jet.api.processor.ContainerProcessor;
 import com.hazelcast.jet.api.container.task.TaskProcessor;
 import com.hazelcast.jet.api.application.ApplicationContext;
-import com.hazelcast.jet.api.application.ApplicationListener;
 import com.hazelcast.jet.impl.actor.shuffling.ShufflingActor;
 import com.hazelcast.jet.api.actor.ProducerCompletionHandler;
 import com.hazelcast.jet.impl.container.DefaultProcessorContext;
@@ -139,16 +138,6 @@ public class DefaultContainerTask implements ContainerTask {
         ContainerProcessorFactory processorFactory = container.getContainerProcessorFactory();
         this.processor = processorFactory == null ? null : processorFactory.getProcessor(vertex);
         this.processorContext = new DefaultProcessorContext(taskContext, this.containerContext);
-
-        if (this.processor != null) {
-            this.applicationContext.registerApplicationListener(new ApplicationListener() {
-                @Override
-                public void onApplicationExecuted(ApplicationContext applicationContext) {
-                    processor.afterProcessing(processorContext);
-                }
-            });
-        }
-
         JetApplicationConfig config = applicationContext.getJetApplicationConfig();
         this.timeAwaiting = config.getJetSecondsToAwait();
     }
