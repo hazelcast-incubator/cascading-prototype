@@ -1,6 +1,7 @@
 package com.hazelcast.jet.countertest;
 
 
+import com.hazelcast.jet.api.container.CounterKey;
 import org.junit.Test;
 import org.junit.After;
 import org.junit.Before;
@@ -115,7 +116,7 @@ public class CounterTest {
 
             application.execute().get();
 
-            Map<String, Accumulator> accumulatorMap = application.getAccumulators();
+            Map<CounterKey, Accumulator> accumulatorMap = application.getAccumulators();
             LongCounter longCounter = (LongCounter) accumulatorMap.values().iterator().next();
 
             assertEquals(longCounter.getPrimitiveValue(), CNT);

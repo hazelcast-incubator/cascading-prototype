@@ -29,14 +29,14 @@ import com.hazelcast.jet.api.application.ApplicationContext;
 public class DefaultTaskContext implements TaskContext {
     private final int taskCount;
     private final int taskNumber;
-    private final ConcurrentMap<String, Accumulator> accumulatorMap;
+    private final ConcurrentMap<CounterKey, Accumulator> accumulatorMap;
 
     public DefaultTaskContext(int taskCount,
                               int taskNumber,
                               ApplicationContext applicationContext) {
         this.taskCount = taskCount;
         this.taskNumber = taskNumber;
-        this.accumulatorMap = new ConcurrentHashMap<String, Accumulator>();
+        this.accumulatorMap = new ConcurrentHashMap<CounterKey, Accumulator>();
         applicationContext.registerAccumulators(this.accumulatorMap);
     }
 
@@ -52,8 +52,8 @@ public class DefaultTaskContext implements TaskContext {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V, R extends Serializable> Accumulator<V, R> getAccumulator(String counterName) {
-        return this.accumulatorMap.get(counterName);
+    public <V, R extends Serializable> Accumulator<V, R> getAccumulator(CounterKey counterKey) {
+        return this.accumulatorMap.get(counterKey);
     }
 
     @Override

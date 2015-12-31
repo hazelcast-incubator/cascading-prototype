@@ -1,6 +1,7 @@
 package com.hazelcast.jet.countertest;
 
 import com.hazelcast.jet.api.dag.Vertex;
+import com.hazelcast.jet.api.container.CounterKey;
 import com.hazelcast.jet.impl.counters.LongCounter;
 import com.hazelcast.jet.api.container.ProcessorContext;
 import com.hazelcast.jet.api.data.io.ProducerInputStream;
@@ -9,9 +10,32 @@ import com.hazelcast.jet.api.processor.ContainerProcessor;
 import com.hazelcast.jet.api.processor.ContainerProcessorFactory;
 
 public class CounterProcessor implements ContainerProcessor<Object, Object> {
-    private static final String OBJECTS_COUNTER = "objectsCounter";
+    private static class StringCounterKey implements CounterKey {
+        private final String counter;
+
+        private StringCounterKey(String counter) {
+            this.counter = counter;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            StringCounterKey that = (StringCounterKey) o;
+
+            return counter.equals(that.counter);
+        }
+
+        @Override
+        public int hashCode() {
+            return counter.hashCode();
+        }
+    }
 
     private LongCounter longCounter;
+
+    private final CounterKey OBJECTS_COUNTER = new StringCounterKey("counter");
 
     @Override
     public void beforeProcessing(ProcessorContext processorContext) {
