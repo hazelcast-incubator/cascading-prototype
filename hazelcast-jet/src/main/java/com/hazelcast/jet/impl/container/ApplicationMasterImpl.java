@@ -294,7 +294,7 @@ public class ApplicationMasterImpl extends
                 );
 
                 jetPacket.setHeader(JetPacket.HEADER_JET_INVALIDATE_APPLICATION);
-                discoveryService.getSocketWriters().get(member.getAddress()).sendServicePacket(jetPacket);
+                this.discoveryService.getSocketWriters().get(member.getAddress()).sendServicePacket(jetPacket);
             } else {
                 invalidateApplicationLocal(reason);
             }
