@@ -323,7 +323,7 @@ public class ApplicationMasterImpl extends
         DataContainer dataContainer = this.containersCache.get(containerContext.getID());
         ContainerTask containerTask = dataContainer.getTasksCache().get(taskID);
         containerTask.registerShufflingReceiver(address, receiver);
-        discoveryService.getSocketReaders().get(address).registerConsumer(receiver.getRingBufferActor());
+        this.discoveryService.getSocketReaders().get(address).registerConsumer(receiver.getRingBufferActor());
     }
 
     @Override
