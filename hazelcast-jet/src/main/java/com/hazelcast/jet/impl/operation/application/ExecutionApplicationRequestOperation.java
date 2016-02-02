@@ -19,8 +19,10 @@ package com.hazelcast.jet.impl.operation.application;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeoutException;
 
 import com.hazelcast.jet.api.hazelcast.JetService;
+import com.hazelcast.jet.impl.statemachine.applicationmaster.requests.InterruptApplicationRequest;
 import com.hazelcast.jet.impl.util.JetUtil;
 import com.hazelcast.spi.impl.NodeEngineImpl;
 import com.hazelcast.jet.api.config.JetApplicationConfig;
@@ -55,7 +57,7 @@ public class ExecutionApplicationRequestOperation extends AbstractJetApplication
 
         JetApplicationConfig config = applicationContext.getJetApplicationConfig();
 
-        long secondsToAwait = config.getApplicationSecondsToAwait();
+        long secondsToAwait = config.getJetSecondsToAwait();
 
         //Waiting for until all containers started
         ApplicationMasterResponse response = future.get(secondsToAwait, TimeUnit.SECONDS);
@@ -70,10 +72,18 @@ public class ExecutionApplicationRequestOperation extends AbstractJetApplication
         if (mailBox != null) {
             Object result = mailBox.poll(secondsToAwait, TimeUnit.SECONDS);
 
+            if (result == null) {
+                applicationMaster.handleContainerRequest
+                        (new InterruptApplicationRequest()).
+                        get(secondsToAwait, TimeUnit.SECONDS);
+
+                throw new TimeoutException("Timeout while waiting for result. Application has been interrupted");
+            }
+
             System.out.println("ExecutionApplicationRequestOperation.run.finished");
 
             if ((result != null) && (result instanceof Throwable)) {
-                throw JetUtil.reThrow((Throwable)result);
+                throw JetUtil.reThrow((Throwable) result);
             }
 
             if (response != ApplicationMasterResponse.SUCCESS) {

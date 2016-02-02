@@ -42,7 +42,7 @@ public class ExecuteApplicationProcessor implements ContainerPayLoadProcessor<Du
         this.applicationMaster = applicationMaster;
         this.applicationContext = applicationMaster.getApplicationContext();
         JetApplicationConfig config = this.applicationContext.getJetApplicationConfig();
-        this.secondsToAwait = config.getApplicationSecondsToAwait();
+        this.secondsToAwait = config.getJetSecondsToAwait();
         this.executorContext = this.applicationContext.getExecutorContext();
     }
 

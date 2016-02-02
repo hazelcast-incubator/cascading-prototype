@@ -278,7 +278,6 @@ public class IListStreamImpl<T> implements Stream<T> {
 
             JetApplicationConfig config = new JetApplicationConfig(applicationName);
             this.jetHazelcastInstance.getConfig().addJetApplicationConfig(config);
-            config.setApplicationSecondsToAwait(100000);
             config.setJetSecondsToAwait(100000);
             config.setChunkSize(4096);
             config.setContainerQueueSize(65536 * 8);

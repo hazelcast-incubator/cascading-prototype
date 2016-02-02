@@ -41,6 +41,7 @@ public abstract class JetBaseTest extends HazelcastTestSupport {
     public static final int TIME_TO_AWAIT = 600;
     public static final String TEST_DATA_PATH = "test.data.path";
 
+    protected static JetApplicationConfig JETCONFIG;
     protected static JetConfig CONFIG;
     protected static JetHazelcastInstance SERVER;
     protected static JetHazelcastClientProxy CLIENT;
@@ -51,17 +52,16 @@ public abstract class JetBaseTest extends HazelcastTestSupport {
     private static final AtomicInteger APPLICATION_NAME_COUNTER = new AtomicInteger();
 
     public static void initCluster(int membersCount) throws Exception {
-        JetApplicationConfig jetConfig = new JetApplicationConfig("testApplication");
-        jetConfig.setApplicationSecondsToAwait(100000);
-        jetConfig.setJetSecondsToAwait(100000);
-        jetConfig.setChunkSize(4000);
-        jetConfig.setMaxProcessingThreads(
+        JETCONFIG = new JetApplicationConfig("testApplication");
+        JETCONFIG.setJetSecondsToAwait(100000);
+        JETCONFIG.setChunkSize(4000);
+        JETCONFIG.setMaxProcessingThreads(
                 Runtime.getRuntime().availableProcessors());
 
         System.setProperty(TEST_DATA_PATH, "src/test/resources/data/");
 
         CONFIG = new JetConfig();
-        CONFIG.addJetApplicationConfig(jetConfig);
+        CONFIG.addJetApplicationConfig(JETCONFIG);
         CONFIG.getMapConfig("source").setInMemoryFormat(InMemoryFormat.OBJECT);
 
         HAZELCAST_FACTORY = new TestJetHazelcastFactory();
@@ -69,7 +69,7 @@ public abstract class JetBaseTest extends HazelcastTestSupport {
         buildCluster(membersCount);
         warmUpPartitions(SERVER);
 
-        CLIENT.getClientConfig().addJetApplicationConfig(jetConfig);
+        CLIENT.getClientConfig().addJetApplicationConfig(JETCONFIG);
     }
 
     protected Application createApplication() {
@@ -77,7 +77,7 @@ public abstract class JetBaseTest extends HazelcastTestSupport {
     }
 
     protected Application createApplication(String applicationName) {
-        return SERVER.getJetApplication(applicationName);
+        return SERVER.getJetApplication(applicationName, JETCONFIG);
     }
 
     protected DAG createDAG() {

@@ -20,6 +20,7 @@ import java.util.List;
 import java.io.IOException;
 
 import com.hazelcast.jet.api.dag.Vertex;
+import com.hazelcast.nio.Address;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.jet.impl.util.JetUtil;
 import com.hazelcast.jet.api.actor.Consumer;
@@ -68,12 +69,16 @@ public class ShufflingReceiver implements ObjectProducer, Consumer<JetPacket> {
 
     private int lastPacketIdx;
 
+    private final Address address;
+
     private int lastProducedPacketsCount;
 
     private ReceiverObjectReader receiverObjectReader;
 
     public ShufflingReceiver(ContainerContext containerContext,
-                             ContainerTask containerTask) {
+                             ContainerTask containerTask,
+                             Address address) {
+        this.address = address;
         this.containerContext = containerContext;
         NodeEngineImpl nodeEngine = (NodeEngineImpl) containerContext.getNodeEngine();
         ApplicationContext applicationContext = containerContext.getApplicationContext();

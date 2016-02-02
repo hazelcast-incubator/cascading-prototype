@@ -132,7 +132,7 @@ public class ExecutionPlanBuilderProcessor implements ContainerPayLoadProcessor<
         JetApplicationConfig jetApplicationConfig = this.applicationContext.getJetApplicationConfig();
 
         long secondsToAwait =
-                jetApplicationConfig.getApplicationSecondsToAwait();
+                jetApplicationConfig.getJetSecondsToAwait();
 
         System.out.println("process4");
 

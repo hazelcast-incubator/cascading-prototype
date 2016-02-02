@@ -19,6 +19,7 @@ package com.hazelcast.jet.api.config;
 
 import java.io.Serializable;
 import java.util.Properties;
+
 import static com.hazelcast.util.Preconditions.checkTrue;
 
 /***
@@ -39,12 +40,8 @@ public class JetApplicationConfig implements Serializable {
 
     public static final String DEFAULT_LOCALIZATION_DIRECTORY = System.getProperty("java.io.tmpdir");
 
-    public static final int DEFAULT_JET_SECONDS_TO_AWAIT = 30;
-
-    public static final long DEFAULT_DAG_PROCESSING_SECONDS_TO_AWAIT = 30L;
-
-    public static final long DEFAULT_EXECUTION_PROCESSING_SECONDS_TO_AWAIT = 30L;
-
+    public static final int DEFAULT_JET_SECONDS_TO_AWAIT = 1200;
+    
     public static final int DEFAULT_CHUNK_SIZE = 256;
 
     public static final int DEFAULT_TCP_BUFFER_SIZE = 1024;
@@ -53,23 +50,15 @@ public class JetApplicationConfig implements Serializable {
 
     private static final int DEFAULT_SHUFFLING_BATCH_SIZE_BYTES = 256;
 
-    private static final int DEFAULT_MAX_SHUFFLING_QUEUE_FAILURES_ATTEMPTS = 10;
-
     private static final int DEFAULT_IO_THREADS_COUNT = 5;
 
     private String localizationDirectory = DEFAULT_LOCALIZATION_DIRECTORY;
 
     private int resourceFileChunkSize = DEFAULT_FILE_CHUNK_SIZE_BYTES;
 
-    private int maxShufflingQueueFailuresAttempts = DEFAULT_MAX_SHUFFLING_QUEUE_FAILURES_ATTEMPTS;
-
     private int defaultApplicationDirectoryCreationAttemptsCount = DEFAULT_APP_ATTEMPTS_COUNT;
 
     private int jetSecondsToAwait = DEFAULT_JET_SECONDS_TO_AWAIT;
-
-    private long applicationSecondsToAwait = DEFAULT_DAG_PROCESSING_SECONDS_TO_AWAIT;
-
-    private long executionProcessingSecondsToAwait = DEFAULT_EXECUTION_PROCESSING_SECONDS_TO_AWAIT;
 
     private int containerQueueSize = DEFAULT_QUEUE_SIZE;
 
@@ -142,10 +131,6 @@ public class JetApplicationConfig implements Serializable {
         this.defaultApplicationDirectoryCreationAttemptsCount = defaultApplicationDirectoryCreationAttemptsCount;
     }
 
-    public void setApplicationSecondsToAwait(int applicationSecondsToAwait) {
-        this.applicationSecondsToAwait = applicationSecondsToAwait;
-    }
-
     public void setJetSecondsToAwait(int jetSecondsToAwait) {
         this.jetSecondsToAwait = jetSecondsToAwait;
     }
@@ -153,14 +138,6 @@ public class JetApplicationConfig implements Serializable {
 
     public int getJetSecondsToAwait() {
         return jetSecondsToAwait;
-    }
-
-    public long getApplicationSecondsToAwait() {
-        return applicationSecondsToAwait;
-    }
-
-    public long getExecutionProcessingSecondsToAwait() {
-        return executionProcessingSecondsToAwait;
     }
 
     public int getContainerQueueSize() {
@@ -190,14 +167,6 @@ public class JetApplicationConfig implements Serializable {
 
     public int getShufflingBatchSizeBytes() {
         return shufflingBatchSizeBytes;
-    }
-
-    public int getMaxShufflingQueueFailuresAttempts() {
-        return maxShufflingQueueFailuresAttempts;
-    }
-
-    public void setMaxShufflingQueueFailuresAttempts(int maxShufflingQueueFailuresAttempts) {
-        this.maxShufflingQueueFailuresAttempts = maxShufflingQueueFailuresAttempts;
     }
 
     public Properties getProperties() {

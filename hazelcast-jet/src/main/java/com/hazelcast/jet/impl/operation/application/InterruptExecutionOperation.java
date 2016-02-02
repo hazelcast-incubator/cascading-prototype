@@ -53,7 +53,7 @@ public class InterruptExecutionOperation extends AbstractJetApplicationRequestOp
         );
 
         JetApplicationConfig config = applicationContext.getJetApplicationConfig();
-        long secondsToAwait = config.getApplicationSecondsToAwait();
+        long secondsToAwait = config.getJetSecondsToAwait();
 
         try {
             ApplicationMasterResponse response = future.get(secondsToAwait, TimeUnit.SECONDS);

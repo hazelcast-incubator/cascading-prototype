@@ -80,12 +80,12 @@ public class DefaultSocketReader
     @Override
     public boolean onExecute(Payload payload) throws Exception {
         if (this.destroyed) {
-            destroySocket();
+            closeSocket();
             return false;
         }
 
         if (this.interrupted) {
-            destroySocket();
+            closeSocket();
             this.finalized = true;
             notifyAMTaskFinished();
             return false;
@@ -113,13 +113,13 @@ public class DefaultSocketReader
     }
 
     private boolean process(Payload payload) {
-        if (this.socketChannel != null) {
+        if ((this.socketChannel != null) && (this.socketChannel.isConnected())) {
             try {
                 int readBytes = this.socketChannel.read(this.receiveBuffer);
 
                 if (readBytes <= 0) {
                     if (readBytes < 0) {
-                        this.socketChannel = null;
+                        closeSocket();
                         return false;
                     }
 

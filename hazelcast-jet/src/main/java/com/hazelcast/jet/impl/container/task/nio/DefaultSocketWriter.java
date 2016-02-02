@@ -16,6 +16,7 @@
 
 package com.hazelcast.jet.impl.container.task.nio;
 
+
 import java.util.List;
 import java.util.Queue;
 import java.nio.ByteBuffer;
@@ -24,7 +25,9 @@ import java.io.IOException;
 
 import com.hazelcast.nio.Address;
 
+import java.nio.channels.Selector;
 import java.net.InetSocketAddress;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import com.hazelcast.jet.api.executor.Payload;
@@ -39,6 +42,8 @@ import com.hazelcast.jet.api.application.ApplicationContext;
 
 public class DefaultSocketWriter
         extends AbstractNetworkTask implements SocketWriter {
+    private int CLOSE_TIME_OUT = 3000;
+
     private int lastFrameId = -1;
 
     private int nextProducerIdx;
@@ -113,7 +118,7 @@ public class DefaultSocketWriter
 
         if (this.interrupted) {
             checkServicesQueue(payload);
-            destroySocket();
+            closeSocket();
             this.finalized = true;
             notifyAMTaskFinished();
             return false;
@@ -207,7 +212,20 @@ public class DefaultSocketWriter
             }
 
             if ((!activeProducer) && (this.waitingForFinish)) {
-                this.finished = true;
+                if (this.selector == null) {
+                    this.socketChannel.socket().getOutputStream().flush();
+                    this.selector = this.socketChannel.provider().openSelector();
+                    this.socketChannel.register(this.selector, SelectionKey.OP_WRITE);
+                }
+
+                if (this.selector.selectNow() > 0) {
+                    for (SelectionKey key : this.selector.keys()) {
+                        if ((key.isWritable()) && (key.isValid())) {
+                            this.selector.close();
+                            this.finished = true;
+                        }
+                    }
+                }
             }
 
             reset();
@@ -285,10 +303,16 @@ public class DefaultSocketWriter
         return true;
     }
 
+    private Selector selector;
+
     private boolean connect() {
         try {
             if (this.socketChannel != null) {
                 this.socketChannel.close();
+            }
+
+            if (this.selector != null) {
+                this.selector.close();
             }
 
             this.socketChannel = SocketChannel.open(this.inetSocketAddress);

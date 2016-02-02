@@ -64,7 +64,7 @@ public class SubmitApplicationRequestOperation extends AbstractJetApplicationReq
         );
 
         JetApplicationConfig config = applicationContext.getJetApplicationConfig();
-        long secondsToAwait = config.getApplicationSecondsToAwait();
+        long secondsToAwait = config.getJetSecondsToAwait();
 
         try {
             ApplicationMasterResponse response = future.get(secondsToAwait, TimeUnit.SECONDS);

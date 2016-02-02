@@ -82,7 +82,7 @@ public abstract class AbstractNetworkTask extends AbstractTask
 
     protected boolean checkFinished() {
         if (this.finished) {
-            destroySocket();
+            closeSocket();
             notifyAMTaskFinished();
             return false;
         }
@@ -120,11 +120,6 @@ public abstract class AbstractNetworkTask extends AbstractTask
                 this.logger.warning(e.getMessage(), e);
             }
         }
-    }
-
-    protected void destroySocket() {
-        closeSocket();
-        this.socketChannel = null;
     }
 
     public boolean inProgress() {

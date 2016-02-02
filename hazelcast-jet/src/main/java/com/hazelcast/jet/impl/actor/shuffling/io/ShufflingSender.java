@@ -174,18 +174,6 @@ public class ShufflingSender extends AbstractHazelcastWriter {
         try {
             this.ringBufferActor.consumeObject(packet);
             this.ringBufferActor.flush();
-
-            if (this.closed)
-                if (this.ringBufferActor.lastConsumedCount() == 1) {
-                    if (this.containerContext.getApplicationContext().getName().equals("shufflingListTest")) {
-                        System.out.println(
-                                System.nanoTime() + " Packet " + packet +
-                                        " has been flushed to " + this.address +
-                                        " node=" + getNodeEngine().getLocalMember()
-                        );
-                    }
-                }
-
         } catch (Exception e) {
             throw JetUtil.reThrow(e);
         }
@@ -202,15 +190,6 @@ public class ShufflingSender extends AbstractHazelcastWriter {
                 );
 
                 packet.setHeader(JetPacket.HEADER_JET_SHUFFLER_CLOSED);
-                this.closed = true;
-                if (this.containerContext.getApplicationContext().getName().equals("shufflingListTest")) {
-                    System.out.println(
-                            System.nanoTime() + " Packet " + packet +
-                                    " has been shuffled to " + this.address +
-                                    " node=" + getNodeEngine().getLocalMember()
-                    );
-                }
-
                 writePacket(packet);
             } finally {
                 this.closed = true;

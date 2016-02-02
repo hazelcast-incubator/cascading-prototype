@@ -60,7 +60,7 @@ public class ApplicationEventOperation extends AbstractJetApplicationRequestOper
                     context.getApplicationStateMachine();
 
             JetApplicationConfig config = context.getJetApplicationConfig();
-            long secondsToAwait = config.getApplicationSecondsToAwait();
+            long secondsToAwait = config.getJetSecondsToAwait();
 
             Future future = applicationStateMachine.handleRequest(
                     new ApplicationStateMachineRequest(this.applicationEvent)

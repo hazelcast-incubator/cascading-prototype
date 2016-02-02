@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.io.ByteArrayOutputStream;
+import java.util.concurrent.ExecutionException;
 
 import static com.hazelcast.util.Preconditions.checkNotNull;
 import static com.hazelcast.util.Preconditions.checkTrue;
@@ -140,6 +141,14 @@ public final class JetUtil {
     }
 
     public static RuntimeException reThrow(Throwable e) {
+        if (e instanceof ExecutionException) {
+            if (e.getCause() != null) {
+                throw reThrow(e.getCause());
+            } else {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (e instanceof RuntimeException) {
             return (RuntimeException) e;
         }
