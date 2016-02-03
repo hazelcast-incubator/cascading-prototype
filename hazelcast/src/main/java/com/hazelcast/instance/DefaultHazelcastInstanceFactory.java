@@ -21,7 +21,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.config.XmlConfigBuilder;
 
 /***
- * Default implementation for Hazelcast instance factoriy;
+ * Default implementation for Hazelcast instance factory;
  */
 public class DefaultHazelcastInstanceFactory implements HazelcastInstanceFactory {
     protected Config wrapConfig(Config config) {
